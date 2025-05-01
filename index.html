@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Цветной Чат</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -111,179 +111,197 @@
 
     <script>
         const supabaseClient = supabase.createClient(
-            'https://mdgffqzkzkfpomcccljo.supabase.co',
-            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1kZ2ZmcXpremtmcG9tY2NjbGpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDYwNjYzMTIsImV4cCI6MjA2MTY0MjMxMn0.H2-v0wwx2Vi6-a3BP4UdLAWrAfWgt1SYQJhm44rUmo4'
-        );
+    'https://mdgffqzkzkfpomcccljo.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1kZ2ZmcXpremtmcG9tY2NjbGpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDYwNjYzMTIsImV4cCI6MjA2MTY0MjMxMn0.H2-v0wwx2Vi6-a3BP4UdLAWrAfWgt1SYQJhm44rUmo4'
+);
 
-        let currentUser = null;
-        let selectedColor = null;
+let currentUser = null;
+let selectedColor = null;
 
-        // Функция сохранения пользователя
-        function saveUser(user) {
-            localStorage.setItem('chatUser', JSON.stringify(user));
-        }
+function saveUser(user) {
+    localStorage.setItem('chatUser', JSON.stringify(user));
+}
 
-        // Функция загрузки пользователя
-        function loadUser() {
-            const savedUser = localStorage.getItem('chatUser');
-            if (savedUser) {
-                currentUser = JSON.parse(savedUser);
-                selectedColor = currentUser.color;
-                return true;
-            }
-            return false;
-        }
+function loadUser() {
+    const savedUser = localStorage.getItem('chatUser');
+    if (savedUser) {
+        currentUser = JSON.parse(savedUser);
+        selectedColor = currentUser.color;
+        return true;
+    }
+    return false;
+}
 
-        // Инициализация при загрузке страницы
-        document.addEventListener('DOMContentLoaded', () => {
-            // Настройка обработчиков цвета
-            document.querySelectorAll('.color-option').forEach(option => {
-                option.addEventListener('click', () => {
-                    document.querySelectorAll('.color-option').forEach(opt => 
-                        opt.classList.remove('selected')
-                    );
-                    option.classList.add('selected');
-                    selectedColor = option.dataset.color;
-                });
-            });
-
-            // Обработчик Enter для отправки
-            document.getElementById('messageInput')?.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    sendMessage();
-                }
-            });
-
-            // Проверяем сохраненного пользователя
-            if (loadUser()) {
-                // Если пользователь был сохранен, автоматически входим
-                document.getElementById('authForm').classList.add('hidden');
-                document.getElementById('chatForm').classList.remove('hidden');
-                
-                // Выделяем сохраненный цвет
-                document.querySelector(`[data-color="${currentUser.color}"]`)?.classList.add('selected');
-                
-                // Загружаем сообщения и подписываемся на обновления
-                loadMessages();
-                subscribeToMessages();
-            }
-        });
-
-        async function login() {
-            const userNumber = document.getElementById('userNumber').value;
-            
-            if (!selectedColor || !userNumber) {
-                alert('Пожалуйста, выберите цвет и введите число');
-                return;
-            }
-
-            currentUser = {
-                color: selectedColor,
-                number: userNumber
-            };
-
-            // Сохраняем пользователя
-            saveUser(currentUser);
-
-            document.getElementById('authForm').classList.add('hidden');
-            document.getElementById('chatForm').classList.remove('hidden');
-            
-            await loadMessages();
-            subscribeToMessages();
-        }
-
-        function logout() {
-            currentUser = null;
-            selectedColor = null;
-            // Удаляем сохраненного пользователя
-            localStorage.removeItem('chatUser');
-            
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.color-option').forEach(option => {
+        option.addEventListener('click', () => {
             document.querySelectorAll('.color-option').forEach(opt => 
                 opt.classList.remove('selected')
             );
-            document.getElementById('userNumber').value = '';
-            document.getElementById('authForm').classList.remove('hidden');
-            document.getElementById('chatForm').classList.add('hidden');
-            document.getElementById('messages').innerHTML = '';
+            option.classList.add('selected');
+            selectedColor = option.dataset.color;
+        });
+    });
+
+    document.getElementById('messageInput')?.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            sendMessage();
         }
+    });
 
-        async function sendMessage() {
-            const messageInput = document.getElementById('messageInput');
-            const messageText = messageInput.value.trim();
-            
-            if (messageText && currentUser) {
-                try {
-                    const { error } = await supabaseClient
-                        .from('messages')
-                        .insert([{
-                            user_color: currentUser.color,
-                            user_number: currentUser.number,
-                            message: messageText
-                        }]);
+    if (loadUser()) {
+        document.getElementById('authForm').classList.add('hidden');
+        document.getElementById('chatForm').classList.remove('hidden');
+        
+        document.querySelector(`[data-color="${currentUser.color}"]`)?.classList.add('selected');
+        
+        loadMessages();
+        setupRealtimeConnection();
+    }
+});
 
-                    if (error) throw error;
-                    messageInput.value = '';
-                } catch (error) {
-                    console.error('Error sending message:', error);
-                    alert('Ошибка отправки сообщения');
+function subscribeToMessages() {
+    supabaseClient.removeAllChannels();
+
+    const channel = supabaseClient
+        .channel('messages-channel')
+        .on('postgres_changes', 
+            {
+                event: '*',
+                schema: 'public',
+                table: 'messages'
+            },
+            (payload) => {
+                console.log('Получено новое сообщение:', payload);
+                if (payload.eventType === 'INSERT') {
+                    addMessageToDisplay(payload.new);
                 }
             }
+        )
+        .subscribe((status) => {
+            console.log('Статус подписки:', status);
+        });
+}
+
+function setupRealtimeConnection() {
+    subscribeToMessages();
+    
+    setInterval(() => {
+        const subscription = supabaseClient.getSubscriptions();
+        if (!subscription.length) {
+            console.log('Переподключение к реалтайм...');
+            subscribeToMessages();
         }
+    }, 5000);
+}
 
-        async function loadMessages() {
-            try {
-                const { data, error } = await supabaseClient
-                    .from('messages')
-                    .select('*')
-                    .order('created_at', { ascending: false })
-                    .limit(50);
+async function login() {
+    const userNumber = document.getElementById('userNumber').value;
+    
+    if (!selectedColor || !userNumber) {
+        alert('Пожалуйста, выберите цвет и введите число');
+        return;
+    }
 
-                if (error) throw error;
-                displayMessages(data.reverse()); // Разворачиваем для правильного порядка
-            } catch (error) {
-                console.error('Error loading messages:', error);
-                alert('Ошибка загрузки сообщений');
+    currentUser = {
+        color: selectedColor,
+        number: userNumber
+    };
+
+    saveUser(currentUser);
+
+    document.getElementById('authForm').classList.add('hidden');
+    document.getElementById('chatForm').classList.remove('hidden');
+    
+    await loadMessages();
+    setupRealtimeConnection();
+}
+
+function logout() {
+    currentUser = null;
+    selectedColor = null;
+    localStorage.removeItem('chatUser');
+    supabaseClient.removeAllChannels();
+    
+    document.querySelectorAll('.color-option').forEach(opt => 
+        opt.classList.remove('selected')
+    );
+    document.getElementById('userNumber').value = '';
+    document.getElementById('authForm').classList.remove('hidden');
+    document.getElementById('chatForm').classList.add('hidden');
+    document.getElementById('messages').innerHTML = '';
+}
+
+async function sendMessage() {
+    const messageInput = document.getElementById('messageInput');
+    const messageText = messageInput.value.trim();
+    
+    if (messageText && currentUser) {
+        try {
+            const { data, error } = await supabaseClient
+                .from('messages')
+                .insert([{
+                    user_color: currentUser.color,
+                    user_number: currentUser.number,
+                    message: messageText,
+                    created_at: new Date().toISOString()
+                }])
+                .select();
+
+            if (error) throw error;
+            messageInput.value = '';
+
+            if (data && data[0]) {
+                addMessageToDisplay(data[0]);
             }
+        } catch (error) {
+            console.error('Error sending message:', error);
+            alert('Ошибка отправки сообщения');
         }
+    }
+}
 
-        function subscribeToMessages() {
-            supabaseClient
-                .channel('public:messages')
-                .on('postgres_changes', { 
-                    event: 'INSERT', 
-                    schema: 'public', 
-                    table: 'messages' 
-                }, payload => {
-                    // Добавляем новое сообщение сразу при получении
-                    addMessageToDisplay(payload.new);
-                })
-                .subscribe((status) => {
-                    if (status === 'SUBSCRIBED') {
-                        console.log('Подключено к реалтайм обновлениям');
-                    }
-                });
-        }
+async function loadMessages() {
+    try {
+        const { data, error } = await supabaseClient
+            .from('messages')
+            .select('*')
+            .order('created_at', { ascending: true })
+            .limit(100);
 
-        function displayMessages(messages) {
-            const messagesDiv = document.getElementById('messages');
-            messagesDiv.innerHTML = '';
-            
-            messages.forEach(message => {
+        if (error) throw error;
+        
+        const messagesDiv = document.getElementById('messages');
+        messagesDiv.innerHTML = '';
+        
+        if (data) {
+            data.forEach(message => {
                 addMessageToDisplay(message);
             });
-            
-            messagesDiv.scrollTop = messagesDiv.scrollHeight;
         }
+    } catch (error) {
+        console.error('Error loading messages:', error);
+        alert('Ошибка загрузки сообщений');
+    }
+}
 
-        function addMessageToDisplay(message) {
-            const messagesDiv = document.getElementById('messages');
-            const messageElement = document.createElement('div');
-            messageElement.className = 'message';
-            messageElement.style.backgroundColor = message.user_color;
-            messageElement.textContent = `Пользователь ${message.user_number}: ${message.message}`;
-            messagesDiv.appendChild(messageElement);
-            messagesDiv.scrollTop = messagesDiv.scrollHeight;
-        }
+function addMessageToDisplay(message) {
+    const messagesDiv = document.getElementById('messages');
+    
+    const existingMessage = Array.from(messagesDiv.children).find(
+        msg => msg.dataset.messageId === message.id
+    );
+    
+    if (!existingMessage) {
+        const messageElement = document.createElement('div');
+        messageElement.className = 'message';
+        messageElement.dataset.messageId = message.id;
+        messageElement.style.backgroundColor = message.user_color;
+        messageElement.textContent = `Пользователь ${message.user_number}: ${message.message}`;
+        messagesDiv.appendChild(messageElement);
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+}
     </script>
 </body>
 </html>
