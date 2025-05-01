@@ -110,20 +110,33 @@
     </div>
 
     <script>
-        // Инициализация Supabase с вашими ключами
-        const supabaseUrl = 'https://mdgffqzkzkfpomcccljo.supabase.co';
-        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1kZ2ZmcXpremtmcG9tY2NjbGpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDYwNjYzMTIsImV4cCI6MjA2MTY0MjMxMn0.H2-v0wwx2Vi6-a3BP4UdLAWrAfWgt1SYQJhm44rUmo4';
-        const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+        // Создаем клиент Supabase до использования
+        const supabaseClient = supabase.createClient(
+            'https://mdgffqzkzkfpomcccljo.supabase.co',
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1kZ2ZmcXpremtmcG9tY2NjbGpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDYwNjYzMTIsImV4cCI6MjA2MTY0MjMxMn0.H2-v0wwx2Vi6-a3BP4UdLAWrAfWgt1SYQJhm44rUmo4'
+        );
 
+        // Объявляем переменные в начале
         let currentUser = null;
         let selectedColor = null;
 
-        // Обработчики для выбора цвета
-        document.querySelectorAll('.color-option').forEach(option => {
-            option.addEventListener('click', () => {
-                document.querySelectorAll('.color-option').forEach(opt => opt.classList.remove('selected'));
-                option.classList.add('selected');
-                selectedColor = option.dataset.color;
+        // Инициализируем обработчики цвета после загрузки DOM
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.color-option').forEach(option => {
+                option.addEventListener('click', () => {
+                    document.querySelectorAll('.color-option').forEach(opt => 
+                        opt.classList.remove('selected')
+                    );
+                    option.classList.add('selected');
+                    selectedColor = option.dataset.color;
+                });
+            });
+
+            // Добавляем обработчик Enter для отправки сообщения
+            document.getElementById('messageInput')?.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    sendMessage();
+                }
             });
         });
 
@@ -143,19 +156,8 @@
             document.getElementById('authForm').classList.add('hidden');
             document.getElementById('chatForm').classList.remove('hidden');
             
-            // Загрузка существующих сообщений и подписка на новые
             await loadMessages();
             subscribeToMessages();
-        }
-
-        function logout() {
-            currentUser = null;
-            selectedColor = null;
-            document.querySelectorAll('.color-option').forEach(opt => opt.classList.remove('selected'));
-            document.getElementById('userNumber').value = '';
-            document.getElementById('authForm').classList.remove('hidden');
-            document.getElementById('chatForm').classList.add('hidden');
-            document.getElementById('messages').innerHTML = '';
         }
 
         async function sendMessage() {
@@ -164,15 +166,13 @@
             
             if (messageText && currentUser) {
                 try {
-                    const { error } = await supabase
+                    const { error } = await supabaseClient
                         .from('messages')
-                        .insert([
-                            {
-                                user_color: currentUser.color,
-                                user_number: currentUser.number,
-                                message: messageText
-                            }
-                        ]);
+                        .insert([{
+                            user_color: currentUser.color,
+                            user_number: currentUser.number,
+                            message: messageText
+                        }]);
 
                     if (error) throw error;
                     messageInput.value = '';
@@ -185,13 +185,12 @@
 
         async function loadMessages() {
             try {
-                const { data, error } = await supabase
+                const { data, error } = await supabaseClient
                     .from('messages')
                     .select('*')
                     .order('created_at', { ascending: true });
 
                 if (error) throw error;
-                
                 displayMessages(data);
             } catch (error) {
                 console.error('Error loading messages:', error);
@@ -200,7 +199,7 @@
         }
 
         function subscribeToMessages() {
-            supabase
+            supabaseClient
                 .channel('public:messages')
                 .on('postgres_changes', { 
                     event: 'INSERT', 
@@ -233,12 +232,17 @@
             messagesDiv.scrollTop = messagesDiv.scrollHeight;
         }
 
-        // Обработка Enter для отправки сообщения
-        document.getElementById('messageInput')?.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                sendMessage();
-            }
-        });
+        function logout() {
+            currentUser = null;
+            selectedColor = null;
+            document.querySelectorAll('.color-option').forEach(opt => 
+                opt.classList.remove('selected')
+            );
+            document.getElementById('userNumber').value = '';
+            document.getElementById('authForm').classList.remove('hidden');
+            document.getElementById('chatForm').classList.add('hidden');
+            document.getElementById('messages').innerHTML = '';
+        }
     </script>
 </body>
 </html>
