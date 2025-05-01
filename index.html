@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Чат приложение</title>
+    <style>
+        .message {
+            padding: 10px;
+            margin: 5px;
+            background-color: #f0f0f0;
+            border-radius: 5px;
+        }
+        #messages {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Форма авторизации -->
+    <div id="authForm">
+        <h2>Авторизация</h2>
+        <input type="email" id="email" placeholder="Email">
+        <input type="password" id="password" placeholder="Пароль">
+        <button onclick="register()">Регистрация</button>
+        <button onclick="login()">Вход</button>
+    </div>
+
+    <!-- Чат -->
+    <div id="chatForm" class="hidden">
+        <h2>Чат</h2>
+        <div id="messages"></div>
+        <input type="text" id="messageInput" placeholder="Введите сообщение">
+        <button onclick="sendMessage()">Отправить</button>
+        <button onclick="logout()">Выйти</button>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } 
+        from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy } 
+        from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDeY5bEoALXcZmZsF1xpC-Cz_yvUL97oiI",
+            authDomain: "trupni-sinod.firebaseapp.com",
+            projectId: "trupni-sinod",
+            storageBucket: "trupni-sinod.firebasestorage.app",
+            messagingSenderId: "1018419346037",
+            appId: "1:1018419346037:web:2ca9c705d43d4c22b3163c"
+        };
+
+        // Инициализация Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Глобальные переменные
+        window.currentUser = null;
+
+        // Функции авторизации
+        window.register = async () => {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            try {
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                console.log("Регистрация успешна:", userCredential.user);
+            } catch (error) {
+                console.error("Ошибка регистрации:", error);
+                alert(error.message);
+            }
+        };
+
+        window.login = async () => {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            try {
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                console.log("Вход выполнен:", userCredential.user);
+            } catch (error) {
+                console.error("Ошибка входа:", error);
+                alert(error.message);
+            }
+        };
+
+        window.logout = async () => {
+            try {
+                await signOut(auth);
+                console.log("Выход выполнен");
+            } catch (error) {
+                console.error("Ошибка выхода:", error);
+                alert(error.message);
+            }
+        };
+
+        // Функция отправки сообщения
+        window.sendMessage = async () => {
+            const messageInput = document.getElementById('messageInput');
+            const message = messageInput.value.trim();
+            
+            if (message && window.currentUser) {
+                try {
+                    await addDoc(collection(db, "messages"), {
+                        text: message,
+                        userId: window.currentUser.uid,
+                        email: window.currentUser.email,
+                        timestamp: new Date()
+                    });
+                    messageInput.value = '';
+                } catch (error) {
+                    console.error("Ошибка отправки сообщения:", error);
+                    alert(error.message);
+                }
+            }
+        };
+
+        // Слушатель состояния авторизации
+        onAuthStateChanged(auth, (user) => {
+            window.currentUser = user;
+            const authForm = document.getElementById('authForm');
+            const chatForm = document.getElementById('chatForm');
+            
+            if (user) {
+                authForm.classList.add('hidden');
+                chatForm.classList.remove('hidden');
+            } else {
+                authForm.classList.remove('hidden');
+                chatForm.classList.add('hidden');
+            }
+        });
+
+        // Слушатель новых сообщений
+        const q = query(collection(db, "messages"), orderBy("timestamp"));
+        onSnapshot(q, (snapshot) => {
+            const messagesDiv = document.getElementById('messages');
+            messagesDiv.innerHTML = '';
+            
+            snapshot.forEach((doc) => {
+                const message = doc.data();
+                const messageElement = document.createElement('div');
+                messageElement.className = 'message';
+                messageElement.textContent = `${message.email}: ${message.text}`;
+                messagesDiv.appendChild(messageElement);
+            });
+            
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        });
+    </script>
+</body>
+</html>
