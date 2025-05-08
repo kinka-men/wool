@@ -33,7 +33,7 @@
     <script src="app.js"></script>
     <script>
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/service-worker.js')
+            navigator.serviceWorker.register('wool/service-worker.js')
                 .then(reg => console.log('Service worker зарегистрирован', reg))
                 .catch(err => console.log('Service worker не зарегистрирован', err));
         }
