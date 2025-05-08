@@ -1,8 +1,8 @@
-// manifest.json
+
 {
     "name": "Кабинет Терапевта",
     "short_name": "Терапевт",
-    "start_url": "/index.html",
+    "start_url": "/wool",
     "display": "standalone",
     "background_color": "#ffffff",
     "theme_color": "#4285f4",
