@@ -379,4 +379,4 @@ document.head.appendChild(style);
 // Инициализация игры
 document.addEventListener('DOMContentLoaded', () => {
     new FifteenPuzzle();
-});
+}); 
