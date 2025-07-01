@@ -3,11 +3,11 @@
   "short_name": "Пятнашки",
   "description": "Классическая игра пятнашки с красивым дизайном и анимациями",
   "theme_color": "#667eea",
-  "background_color": "#667eea",
+  "background_color": "#ffffff",
   "display": "standalone",
-  "orientation": "portrait",
-  "scope": "/",
-  "start_url": "/",
+  "orientation": "portrait-primary",
+  "scope": "./",
+  "start_url": "./",
   "icons": [
     {
       "src": "icon-192.png",
@@ -22,7 +22,25 @@
       "purpose": "maskable any"
     }
   ],
-  "categories": ["games", "entertainment"],
+  "categories": ["games", "entertainment", "puzzle"],
   "lang": "ru",
-  "dir": "ltr"
+  "dir": "ltr",
+  "prefer_related_applications": false,
+  "edge_side_panel": {
+    "preferred_width": 400
+  },
+  "shortcuts": [
+    {
+      "name": "Новая игра",
+      "short_name": "Новая игра",
+      "description": "Начать новую игру в пятнашки",
+      "url": "./",
+      "icons": [
+        {
+          "src": "icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ]
 }
