@@ -3,40 +3,92 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#4285f4">
-    <title>Терапевт PWA</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Пятнашки - 15 Puzzle Game</title>
+    <meta name="description" content="Классическая игра Пятнашки с красивым дизайном и анимациями">
+    <meta name="theme-color" content="#667eea">
+    
+    <!-- PWA манифест -->
     <link rel="manifest" href="manifest.json">
-    <link rel="apple-touch-icon" href="icons/icon-192x192.png">
+    
+    <!-- Иконки -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧩</text></svg>">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    
+    <!-- Стили -->
+    <link rel="stylesheet" href="styles.css">
+    
+    <!-- Шрифты -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <header>
-        <h1>Кабинет Терапевта</h1>
-    </header>
-    <main>
-        <section class="info">
-            <p>Добро пожаловать в наш кабинет. Здесь вы можете записаться на прием.</p>
-        </section>
-        <section class="buttons">
-            <button id="appointmentBtn">Записаться на прием</button>
-            <button id="installBtn">Установить приложение</button>
-        </section>
-        <div id="installInstructions" class="hidden">
-            <p>Для установки на iOS: нажмите на кнопку "Поделиться" и выберите "На экран «Домой»"</p>
-            <p>Для установки на Android: откройте меню и выберите "Установить приложение"</p>
-        </div>
-    </main>
-    <footer>
-        <p>© 2025 Кабинет Терапевта</p>
-    </footer>
+    <div class="app">
+        <header class="header">
+            <h1 class="title">🧩 Пятнашки</h1>
+            <div class="header-controls">
+                <button id="installBtn" class="install-btn" style="display: none;">
+                    📱 Установить приложение
+                </button>
+                <div class="stats">
+                    <div class="stat">
+                        <span class="stat-label">Ходы:</span>
+                        <span id="moves" class="stat-value">0</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-label">Время:</span>
+                        <span id="timer" class="stat-value">00:00</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main class="main">
+            <div class="game-container">
+                <div class="game-board" id="gameBoard">
+                    <!-- Плитки будут сгенерированы JavaScript -->
+                </div>
+                
+                <div class="game-controls">
+                    <button id="shuffleBtn" class="control-btn primary">
+                        🔀 Перемешать
+                    </button>
+                    <button id="resetBtn" class="control-btn secondary">
+                        🔄 Сброс
+                    </button>
+                    <button id="hintBtn" class="control-btn hint">
+                        💡 Подсказка
+                    </button>
+                </div>
+
+                <div class="difficulty-selector">
+                    <label for="difficulty">Сложность:</label>
+                    <select id="difficulty" class="difficulty-select">
+                        <option value="3">3×3 (8 плиток)</option>
+                        <option value="4" selected>4×4 (15 плиток)</option>
+                        <option value="5">5×5 (24 плитки)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="victory-popup" id="victoryPopup">
+                <div class="victory-content">
+                    <h2>🎉 Поздравляем!</h2>
+                    <p>Вы решили головоломку!</p>
+                    <div class="victory-stats">
+                        <div>Ходов: <span id="finalMoves"></span></div>
+                        <div>Время: <span id="finalTime"></span></div>
+                    </div>
+                    <button id="playAgainBtn" class="control-btn primary">
+                        Играть снова
+                    </button>
+                </div>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <p>Классическая головоломка пятнашки с современным дизайном</p>
+        </footer>
+    </div>
 
     <script src="app.js"></script>
-    <script>
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('service-worker.js')
-                .then(reg => console.log('Service worker зарегистрирован', reg))
-                .catch(err => console.log('Service worker не зарегистрирован', err));
-        }
-    </script>
 </body>
 </html>
