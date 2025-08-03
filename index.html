@@ -3,15 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Пятнашки - 15 Puzzle Game</title>
-    <meta name="description" content="Классическая игра Пятнашки с красивым дизайном и анимациями">
-    <meta name="theme-color" content="#667eea">
+    <title>Шахматы - Chess Game</title>
+    <meta name="description" content="Классическая игра в шахматы с красивым дизайном">
+    <meta name="theme-color" content="#2c3e50">
     
     <!-- PWA манифест -->
     <link rel="manifest" href="manifest.json">
     
     <!-- Иконки -->
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧩</text></svg>">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>♔</text></svg>">
     <link rel="apple-touch-icon" href="icon-192.png">
     
     <!-- Стили -->
@@ -23,19 +23,18 @@
 <body>
     <div class="app">
         <header class="header">
-            <h1 class="title">🧩 Пятнашки</h1>
+            <h1 class="title">♔ Шахматы</h1>
             <div class="header-controls">
                 <button id="installBtn" class="install-btn" style="display: none;">
                     📱 Установить приложение
                 </button>
-                <div class="stats">
-                    <div class="stat">
-                        <span class="stat-label">Ходы:</span>
-                        <span id="moves" class="stat-value">0</span>
+                <div class="game-info">
+                    <div class="current-player">
+                        <span class="player-label">Ход:</span>
+                        <span id="currentPlayer" class="player-name">Белые</span>
                     </div>
-                    <div class="stat">
-                        <span class="stat-label">Время:</span>
-                        <span id="timer" class="stat-value">00:00</span>
+                    <div class="game-status">
+                        <span id="gameStatus" class="status-text">Игра идет</span>
                     </div>
                 </div>
             </div>
@@ -43,39 +42,37 @@
 
         <main class="main">
             <div class="game-container">
-                <div class="game-board" id="gameBoard">
-                    <!-- Плитки будут сгенерированы JavaScript -->
+                <div class="chess-board" id="chessBoard">
+                    <!-- Шахматная доска будет сгенерирована JavaScript -->
                 </div>
                 
                 <div class="game-controls">
-                    <button id="shuffleBtn" class="control-btn primary">
-                        🔀 Перемешать
+                    <button id="newGameBtn" class="control-btn primary">
+                        🆕 Новая игра
                     </button>
-                    <button id="resetBtn" class="control-btn secondary">
-                        🔄 Сброс
+                    <button id="undoBtn" class="control-btn secondary">
+                        ↩️ Отменить ход
                     </button>
-                    <button id="hintBtn" class="control-btn hint">
-                        💡 Подсказка
+                    <button id="flipBoardBtn" class="control-btn hint">
+                        🔄 Перевернуть доску
                     </button>
                 </div>
 
-                <div class="difficulty-selector">
-                    <label for="difficulty">Сложность:</label>
-                    <select id="difficulty" class="difficulty-select">
-                        <option value="3">3×3 (8 плиток)</option>
-                        <option value="4" selected>4×4 (15 плиток)</option>
-                        <option value="5">5×5 (24 плитки)</option>
-                    </select>
+                <div class="move-history">
+                    <h3>История ходов</h3>
+                    <div id="moveHistory" class="history-list">
+                        <!-- История ходов будет добавлена JavaScript -->
+                    </div>
                 </div>
             </div>
 
-            <div class="victory-popup" id="victoryPopup">
-                <div class="victory-content">
-                    <h2>🎉 Поздравляем!</h2>
-                    <p>Вы решили головоломку!</p>
-                    <div class="victory-stats">
-                        <div>Ходов: <span id="finalMoves"></span></div>
-                        <div>Время: <span id="finalTime"></span></div>
+            <div class="game-over-popup" id="gameOverPopup">
+                <div class="game-over-content">
+                    <h2 id="gameOverTitle">🎉 Игра окончена!</h2>
+                    <p id="gameOverMessage">Победитель: <span id="winner"></span></p>
+                    <div class="game-over-stats">
+                        <div>Ходов: <span id="totalMoves"></span></div>
+                        <div>Время: <span id="gameTime"></span></div>
                     </div>
                     <button id="playAgainBtn" class="control-btn primary">
                         Играть снова
@@ -85,7 +82,7 @@
         </main>
 
         <footer class="footer">
-            <p>Классическая головоломка пятнашки с современным дизайном</p>
+            <p>Классическая игра в шахматы с современным дизайном</p>
         </footer>
     </div>
 
