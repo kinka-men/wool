@@ -1,0 +1,1885 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>🐸 Жаба-офлайн (HTML-версия)</title>
+<style>
+  :root{
+    --bg:#0f1a14;
+    --bg2:#152821;
+    --panel:#1c3327;
+    --panel2:#214030;
+    --line:#2e5a44;
+    --accent:#7ed957;
+    --accent2:#b4ff5a;
+    --warn:#ffb648;
+    --bad:#ff6868;
+    --good:#7ed957;
+    --text:#e8f5e9;
+    --muted:#9fbfa9;
+    --gold:#ffd24a;
+    --silver:#cfd7dc;
+    --bronze:#d49a5a;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:linear-gradient(180deg,#0c1410,#102016 60%,#0a130d);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen,Ubuntu,sans-serif;}
+  body{min-height:100vh;display:flex;flex-direction:column}
+  header{padding:10px 14px;background:var(--bg2);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px;flex-wrap:wrap;position:sticky;top:0;z-index:10}
+  header h1{font-size:18px;margin:0;display:flex;align-items:center;gap:8px}
+  header .balance{margin-left:auto;display:flex;gap:14px;flex-wrap:wrap;font-size:14px}
+  header .balance span{background:#0e1a13;padding:6px 10px;border:1px solid var(--line);border-radius:8px}
+  nav.tabs{display:flex;flex-wrap:wrap;gap:6px;padding:10px;background:var(--bg2);border-bottom:1px solid var(--line);position:sticky;top:54px;z-index:9}
+  nav.tabs button{background:#0e1a13;border:1px solid var(--line);color:var(--text);padding:8px 12px;border-radius:9px;cursor:pointer;font-size:14px}
+  nav.tabs button.active{background:var(--accent);color:#0d1d12;border-color:var(--accent2);font-weight:700}
+  main{flex:1;padding:14px;max-width:1100px;width:100%;margin:0 auto}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:14px}
+  .panel h2{margin:0 0 10px;font-size:16px;display:flex;align-items:center;gap:8px;border-bottom:1px dashed var(--line);padding-bottom:8px}
+  .panel h3{margin:14px 0 6px;font-size:14px;color:var(--accent2)}
+  .row{display:flex;gap:10px;flex-wrap:wrap}
+  .col{flex:1 1 240px;min-width:0}
+  .btn{background:var(--accent);color:#0d1d12;border:0;border-radius:8px;padding:8px 12px;cursor:pointer;font-weight:600;font-size:13px}
+  .btn:hover{background:var(--accent2)}
+  .btn:disabled{background:#3a4a40;color:#7a8a80;cursor:not-allowed}
+  .btn.alt{background:#28533c;color:var(--text)}
+  .btn.alt:hover{background:#316a4c}
+  .btn.warn{background:#7a4a1f;color:#ffd9a8}
+  .btn.bad{background:#7a2222;color:#ffd0d0}
+  .btn.small{padding:5px 8px;font-size:12px}
+  .bar{height:10px;background:#0a1410;border:1px solid var(--line);border-radius:6px;overflow:hidden;position:relative}
+  .bar > div{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .25s}
+  .bar.hp > div{background:linear-gradient(90deg,#ff6868,#ffaaaa)}
+  .bar.mood > div{background:linear-gradient(90deg,#ffd24a,#fff0a0)}
+  .stat{display:flex;align-items:center;gap:6px;font-size:13px;padding:3px 0}
+  .stat .lbl{color:var(--muted);min-width:120px}
+  .stat .val{font-weight:600}
+  .pet-card{display:flex;gap:14px;flex-wrap:wrap;align-items:flex-start}
+  .pet-photo{width:140px;height:140px;border-radius:14px;background:#0a1410 url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='40' fill='%237ed957'/><circle cx='35' cy='38' r='9' fill='white'/><circle cx='65' cy='38' r='9' fill='white'/><circle cx='35' cy='38' r='4' fill='black'/><circle cx='65' cy='38' r='4' fill='black'/><path d='M30 60 Q50 80 70 60' stroke='%23114d22' fill='none' stroke-width='4' stroke-linecap='round'/></svg>") center/cover no-repeat;border:1px solid var(--line);flex-shrink:0}
+  .pet-info{flex:1 1 240px;min-width:0}
+  .grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+  .grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px}
+  .item{background:#0e1a13;border:1px solid var(--line);border-radius:9px;padding:8px;font-size:13px;display:flex;flex-direction:column;gap:4px}
+  .item .name{font-weight:600;color:var(--accent2)}
+  .item .desc{color:var(--muted);font-size:12px}
+  .item .row{margin-top:6px}
+  .log{background:#0a1410;border:1px solid var(--line);border-radius:9px;padding:10px;height:240px;overflow-y:auto;font-size:13px;font-family:ui-monospace,monospace;line-height:1.5}
+  .log .l{padding:3px 0;border-bottom:1px dashed #1c3327}
+  .log .l:last-child{border:0}
+  .tag{display:inline-block;padding:1px 7px;border-radius:99px;font-size:11px;border:1px solid var(--line);background:#0e1a13;margin-right:4px}
+  .tag.gold{color:var(--gold);border-color:#806010}
+  .tag.silver{color:var(--silver);border-color:#445}
+  .tag.bronze{color:var(--bronze);border-color:#553}
+  .cd{font-size:12px;color:var(--muted)}
+  .cd.ready{color:var(--good);font-weight:600}
+  .modal{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:100;padding:14px}
+  .modal.show{display:flex}
+  .modal .box{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;max-width:560px;width:100%;max-height:90vh;overflow:auto}
+  .toast-wrap{position:fixed;top:14px;right:14px;display:flex;flex-direction:column;gap:6px;z-index:200;max-width:90%}
+  .toast{background:#1f3a2c;border:1px solid var(--accent);color:#e9ffe0;padding:8px 12px;border-radius:8px;font-size:13px;box-shadow:0 6px 14px rgba(0,0,0,.4);animation:fadein .2s ease}
+  @keyframes fadein{from{transform:translateY(-6px);opacity:0}to{transform:none;opacity:1}}
+  .frog-emoji{font-size:88px;text-align:center;line-height:140px}
+  .inline{display:inline-flex;gap:4px;align-items:center}
+  .table{width:100%;border-collapse:collapse;font-size:13px}
+  .table th,.table td{padding:5px 6px;border-bottom:1px dashed #2a4a36;text-align:left}
+  .pill{display:inline-block;padding:2px 8px;border-radius:99px;background:#0e1a13;border:1px solid var(--line);font-size:12px}
+  .pill.good{color:var(--good);border-color:#3a7a40}
+  .pill.bad{color:var(--bad);border-color:#7a3a3a}
+  .pill.warn{color:var(--warn);border-color:#7a5a2a}
+  .pill.gold{color:var(--gold);border-color:#7a5a10}
+  .frog-mood{font-size:24px}
+  .mini-input{background:#0a1410;border:1px solid var(--line);color:var(--text);padding:6px 8px;border-radius:6px;font-size:13px}
+  .equip-slot{display:flex;justify-content:space-between;align-items:center;padding:6px 8px;background:#0e1a13;border:1px solid var(--line);border-radius:8px;margin-bottom:6px;font-size:13px}
+  .equip-slot .nm{display:flex;gap:6px;align-items:center}
+  .equip-slot .dur{color:var(--muted);font-size:12px}
+  .help{color:var(--muted);font-size:12px;line-height:1.5}
+  .head-grad{background:linear-gradient(90deg,#1f4030,#1c3327);padding:14px;border-radius:12px;border:1px solid var(--line);margin-bottom:14px}
+  .ach-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px}
+  .ach{background:#0e1a13;border:1px solid var(--line);border-radius:9px;padding:8px;font-size:12px;opacity:.55}
+  .ach.b{opacity:1;border-color:#a06822}
+  .ach.s{opacity:1;border-color:#9aa6ac}
+  .ach.g{opacity:1;border-color:#d4af1d;box-shadow:0 0 0 1px #806010 inset}
+  .ach .n{font-weight:600}
+  .scroll-x{overflow-x:auto}
+  @media (max-width:540px){
+    header h1{font-size:14px}
+    header .balance{font-size:12px}
+    nav.tabs button{padding:6px 9px;font-size:12px}
+    .pet-photo{width:110px;height:110px}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🐸 Жаба-офлайн <span class="pill" id="dayPill">День 1</span></h1>
+  <div class="balance">
+    <span title="Букашки">🐞 <b id="hudBugs">0</b></span>
+    <span title="Жабогемы">💠 <b id="hudGems">0</b></span>
+    <span title="Донат-баланс">💸 <b id="hudRub">0</b>₽</span>
+    <span title="Время игры (ускорено)">⏱ <b id="hudClock">00:00</b></span>
+  </div>
+</header>
+
+<nav class="tabs" id="tabs"></nav>
+
+<main id="view"></main>
+
+<div class="toast-wrap" id="toasts"></div>
+
+<div class="modal" id="modal"><div class="box" id="modalBox"></div></div>
+
+<script>
+/* ===================== ЯДРО / СОХРАНЕНИЕ / ВРЕМЯ ===================== */
+
+const TICK_MS = 1000;            // 1 реальная секунда = 1 игровая минута
+const SAVE_KEY = "toadgame_v1";
+
+const now = () => Date.now();
+
+// Игровые "часы": все таймеры считаются в игровых минутах
+function gameMinutes(){ return Math.floor((now() - S.startedAt)/TICK_MS); }
+function fmtCD(targetMin){
+  const left = targetMin - gameMinutes();
+  if(left<=0) return "готово";
+  const h = Math.floor(left/60), m = left%60;
+  return (h?h+"ч ":"")+m+"м";
+}
+function ready(targetMin){ return gameMinutes() >= targetMin; }
+function setCD(hours){ return gameMinutes() + Math.round(hours*60); }
+
+const rng = (a,b)=> a + Math.floor(Math.random()*(b-a+1));
+const chance = p => Math.random() < p;
+const pick = arr => arr[Math.floor(Math.random()*arr.length)];
+const clamp = (v,a,b)=> Math.max(a,Math.min(b,v));
+
+/* ===================== ДАННЫЕ ИГРЫ ===================== */
+
+const FROG_EMOJIS = ["🐸","🐸","🐸","🐊","🦎","🐢","🐸","🐸","🐸"];
+const GEAR_TYPES = {
+  helmet:{ru:"Наголовник",emoji:"🪖",stat:"hp"},
+  chest: {ru:"Нагрудник", emoji:"🥋",stat:"hp"},
+  boots: {ru:"Налапники", emoji:"🥾",stat:"def"},
+  melee: {ru:"Ближний бой",emoji:"🗡",stat:"atk"},
+  ranged:{ru:"Дальний бой",emoji:"🏹",stat:"atk"},
+  amulet:{ru:"Кулон",      emoji:"📿",stat:"luck"},
+};
+const GEAR_CRAFTS = [
+  // tier 1 — bugs only
+  {id:"capleather_helmet",slot:"helmet",name:"Кожаный наголовник",emoji:"🪖",bonus:3,dur:8,cost:{bugs:200},tier:1},
+  {id:"capleather_chest", slot:"chest", name:"Кожаный нагрудник", emoji:"🥋",bonus:4,dur:8,cost:{bugs:280},tier:1},
+  {id:"capleather_boots", slot:"boots", name:"Кожаные налапники", emoji:"🥾",bonus:2,dur:8,cost:{bugs:180},tier:1},
+  {id:"cap_stick", slot:"melee", name:"Палка",emoji:"🗡",bonus:2,dur:8,cost:{bugs:160},tier:1},
+  {id:"cap_sling",slot:"ranged",name:"Рогатка",emoji:"🏹",bonus:1,dur:8,cost:{bugs:140},tier:1},
+  // tier 2 — herbs
+  {id:"alg_helmet",slot:"helmet",name:"Шлем из водорослей",emoji:"🪖",bonus:6,dur:10,cost:{bugs:400,herb:5},tier:2},
+  {id:"alg_chest", slot:"chest", name:"Доспех из водорослей",emoji:"🥋",bonus:7,dur:10,cost:{bugs:500,herb:7},tier:2},
+  {id:"alg_boots", slot:"boots", name:"Поножи из водорослей",emoji:"🥾",bonus:4,dur:10,cost:{bugs:300,herb:4},tier:2},
+  {id:"alg_blade", slot:"melee", name:"Острый камень",emoji:"🗡",bonus:5,dur:10,cost:{bugs:380,gear:3},tier:2},
+  {id:"alg_bow",   slot:"ranged",name:"Лук из тростника",emoji:"🏹",bonus:4,dur:10,cost:{bugs:380,gear:3},tier:2},
+  // tier 3 — lilies
+  {id:"lily_helmet",slot:"helmet",name:"Шлем из кувшинок",emoji:"🪖",bonus:10,dur:12,cost:{bugs:900,lily:4,gear:4},tier:3},
+  {id:"lily_chest", slot:"chest", name:"Латы из кувшинок", emoji:"🥋",bonus:12,dur:12,cost:{bugs:1100,lily:6,gear:5},tier:3},
+  {id:"lily_boots", slot:"boots", name:"Сапоги из кувшинок",emoji:"🥾",bonus:7,dur:12,cost:{bugs:700,lily:3,gear:3},tier:3},
+  {id:"lily_blade", slot:"melee", name:"Лилийный меч",emoji:"🗡",bonus:8,dur:12,cost:{bugs:800,lily:3,gear:5},tier:3},
+  {id:"lily_bow",   slot:"ranged",name:"Кувшинковый лук",emoji:"🏹",bonus:7,dur:12,cost:{bugs:800,lily:3,gear:5},tier:3},
+  // tier 4 — beaks
+  {id:"heron_helmet",slot:"helmet",name:"Шлем из клюва цапли",emoji:"🪖",bonus:16,dur:15,cost:{bugs:1800,beak:3,gear:6},tier:4},
+  {id:"heron_chest", slot:"chest", name:"Броня клюва цапли",  emoji:"🥋",bonus:18,dur:15,cost:{bugs:2200,beak:5,gear:7},tier:4},
+  {id:"heron_boots", slot:"boots", name:"Налапники цапли",   emoji:"🥾",bonus:11,dur:15,cost:{bugs:1400,beak:3,gear:5},tier:4},
+  {id:"heron_blade", slot:"melee", name:"Костяной клинок", emoji:"🗡",bonus:13,dur:15,cost:{bugs:1600,beak:3,gear:6},tier:4},
+  {id:"heron_bow",   slot:"ranged",name:"Костяной лук", emoji:"🏹",bonus:12,dur:15,cost:{bugs:1600,beak:3,gear:6},tier:4},
+  // event sets — crocoarmor
+  {id:"croco_helmet",slot:"helmet",name:"🐊 Кроко-шлем",emoji:"🐊",bonus:14,dur:14,cost:{bugs:1500,herb:8,lily:3},tier:"event",perk:"crocoblock"},
+  {id:"croco_chest", slot:"chest", name:"🐊 Кроко-броня",emoji:"🐊",bonus:16,dur:14,cost:{bugs:1900,herb:10,lily:4},tier:"event",perk:"crocoblock"},
+  {id:"croco_boots", slot:"boots", name:"🐊 Кроко-лапы",emoji:"🐊",bonus:9, dur:14,cost:{bugs:1200,herb:6,lily:2},tier:"event",perk:"crocoblock"},
+];
+const AMULETS = [
+  {id:"am_gang",  name:"📿 Кулон братвы",  bandMaxBonus:50,  bandDmgBonus:0.10, days:5, cost:{bugs:1200,gear:5}},
+  {id:"am_heron", name:"📿 Кулон цапель",  bandMaxBonus:100, bandDmgBonus:0.15, days:7, cost:{bugs:2500,beak:3}},
+];
+const CLASSES = {
+  none:    {name:"—",desc:"Класс не выбран. Доступно с 5 уровня."},
+  artisan: {name:"👷 Ремесленник", desc:"+5 защ., −2 ур. в PvP, +20% урона по боссам."},
+  assassin:{name:"🦹 Ассасин",     desc:"+10% шанс уклонения, лучше отмычки в ограблении."},
+  rogue:   {name:"🧙 Авантюрист",  desc:"+15% урон оружия, банда срабатывает на 2% чаще."},
+};
+const DUNGEONS = [
+  {id:"bronze",name:"🥉 Бронзовое",cost:400,boss:"Насекомозавр",bossHp:60,bossAtk:8,bossDef:3,drops:{herb:.8,lily:.2,gear:1,fill:2}},
+  {id:"silver",name:"🥈 Серебряное",cost:600,boss:"Пепе",bossHp:120,bossAtk:14,bossDef:6,drops:{herb:.3,lily:.5,beak:.2,gear:2,fill:3}},
+  {id:"gold",  name:"🥇 Золотое",  cost:800,boss:"Шрек",bossHp:200,bossAtk:22,bossDef:10,drops:{lily:.5,beak:.5,gear:3,fill:5}},
+  {id:"event", name:"❄️ Ивентовое (зимнее)",cost:450,boss:"Снегожаб",bossHp:90,bossAtk:11,bossDef:5,drops:{snow:1,herb:.5,fill:3}},
+];
+const DAILIES = [
+  {id:"feed3",  txt:"Покорми жабу 3 раза",   need:3, type:"feed",reward:{bugs:200}},
+  {id:"work2",  txt:"Сходи на работу 2 раза",need:2, type:"work",reward:{bugs:300}},
+  {id:"win3",   txt:"Победи 3 раз в боях",   need:3, type:"win", reward:{bugs:400,gems:1}},
+  {id:"arena2", txt:"Соверши 2 атаки на арене",need:2,type:"arena",reward:{bugs:350}},
+  {id:"dung1",  txt:"Пройди подземелье",     need:1, type:"dung", reward:{bugs:500,gems:1}},
+  {id:"feed1prem",txt:"Откорми жабу",        need:1, type:"force",reward:{bugs:250}},
+];
+const RP_VERBS = [
+  ["погладить","🥰 Жаба ласково мурлычет.",+8],
+  ["укусить","😤 Жаба легонько прикусила в ответ.",-3],
+  ["обнять","🤗 Жаба обнимает в ответ.",+12],
+  ["поцеловать","😘 Жаба смутилась.",+10],
+  ["отмудохать","🥊 Жаба возмущена. Не делай так больше.",-18],
+];
+const CHEST_TYPES = {
+  random:    {rub:39, label:"🎲 Случайный сундук"},
+  money:     {rub:49, label:"🐞 Денежный сундук"},
+  gear:      {rub:49, label:"⚙ Оружейный сундук"},
+  mystery:   {rub:49, label:"🙈 Таинственный сундук"},
+  fill:      {rub:69, label:"🍰 Сытный сундук"},
+};
+
+/* ===================== СТЕЙТ ===================== */
+
+let S;
+
+function defaultState(){
+  return {
+    startedAt: now(),
+    name:"Жаба",
+    photo:"🐸",
+    level:1,
+    fill:0, fillMax:5, fillNext:5,    // сытость = опыт
+    mood:250, moodMax:500,
+    hp:10, hpMax:10,
+    state:"alive", // alive | reanim | dead
+    bugs:300,
+    gems:0,
+    rub:0,
+    cls:"none", clsLvl:0,
+    classBoughtAt:0,
+    achPoints:0,
+    achievements:{},     // id -> 1|2|3
+    wins:0, losses:0,
+    inv:{ medkit:1, candy:1, lolipop:1, expcap:0, snack:2, herb:0, lily:0, beak:0, gear:0, tape:0, map:0, mapPrem:0, beer:0, dragonfly:0, frogling:0, snow:0, jewelbug:0 },
+    equip:{}, // slot -> {craftId, durability}
+    mods:{},  // slot -> [modId,...]
+    band: null, // {type:"gang"|"heron", loyalty:50, maxLoyalty:100}
+    amulet:null,// {id, expiresAt(game-min)}
+    boost:null, // {id, expiresAt}
+    cd:{
+      feed:0, force:0, work:0, party:0, robbery:0,
+      arenaReg:0, arenaAtk:0, dailyJaba:0, mapCard:0,
+      duel:0, race:0, ksp:0, raffle:0, dungeon:0, walk:0,
+    },
+    workActive:null, // {kind:"basic"|"adv", subkind, doneAt, started}
+    spouse:null,     // {name, since(min), gifts, faithful:true/false}
+    child:null,      // {name, level, fill, mood, kindergartenStartedAt, gameStartedAt, brawlReadyAt}
+    clan:null,       // {name, members:[npc], lvl, exp, points, warAt, league}
+    daily:{date:0, log:{}, claimed:{}, streak:0, status:"green"},
+    arena:{league:"wood", reg:false, atk:false, regTime:0, wins:0, losses:0, season:0},
+    rivalPool:[],
+    eventActive:"crocodile",
+    log:[],
+    settings:{ deleteOld:false, fastBattle:false },
+    lastTick: now(),
+    history:{ topBugs:0, topLevel:0, championLvl:0, bandName:null },
+    quickRegFreeLeft:10,
+  };
+}
+
+function save(){ try{ localStorage.setItem(SAVE_KEY, JSON.stringify(S)); }catch(e){} }
+function load(){
+  try{
+    const raw = localStorage.getItem(SAVE_KEY);
+    if(!raw) return null;
+    return JSON.parse(raw);
+  }catch(e){ return null }
+}
+function reset(){
+  if(!confirm("Уверен? Это сбросит сохранение.")) return;
+  localStorage.removeItem(SAVE_KEY);
+  location.reload();
+}
+
+/* ===================== УТИЛИТЫ UI ===================== */
+
+function log(t){
+  S.log.unshift("["+fmtClock()+"] "+t);
+  S.log = S.log.slice(0,200);
+}
+function fmtClock(){
+  const m = gameMinutes();
+  const d = Math.floor(m/(24*60));
+  const hh = Math.floor((m%(24*60))/60);
+  const mm = m%60;
+  return (d?"д"+d+" ":"")+String(hh).padStart(2,"0")+":"+String(mm).padStart(2,"0");
+}
+function toast(msg){
+  const t = document.createElement("div");
+  t.className = "toast";
+  t.textContent = msg;
+  document.getElementById("toasts").appendChild(t);
+  setTimeout(()=>t.remove(), 3000);
+}
+function modal(html){
+  document.getElementById("modalBox").innerHTML = html;
+  document.getElementById("modal").classList.add("show");
+}
+function closeModal(){ document.getElementById("modal").classList.remove("show"); }
+document.getElementById("modal").addEventListener("click", e=>{
+  if(e.target.id==="modal") closeModal();
+});
+
+/* ===================== БОЕВЫЕ ХАРАКТЕРИСТИКИ ===================== */
+
+function combatStats(actor){
+  // actor: S (главная жаба) или фейковый противник
+  if(!actor.equip){ // npc
+    return {atk:actor.atk, def:actor.def, hp:actor.hp, hpMax:actor.hpMax};
+  }
+  let atk = Math.floor(actor.level/2)+2; // база
+  let def = 0;
+  let hpBonus = 0;
+  for(const slot in actor.equip){
+    const e = actor.equip[slot];
+    if(!e || e.durability<=0) continue;
+    const meta = GEAR_CRAFTS.find(g=>g.id===e.craftId);
+    if(!meta) continue;
+    if(meta.slot==="melee"||meta.slot==="ranged") atk += meta.bonus;
+    else if(meta.slot==="boots") def += meta.bonus;
+    else { hpBonus += meta.bonus; def += Math.floor(meta.bonus/3); }
+  }
+  // модификаторы
+  for(const slot in actor.mods){
+    const mods = actor.mods[slot]||[];
+    const dmg = mods.filter(m=>m==="dmg").length;
+    if(dmg>=3) atk += 10; else if(dmg===2) atk += 8; else if(dmg===1) atk += 5;
+    const armor = mods.filter(m=>m==="armor").length;
+    if(armor>=3) def += 10; else if(armor===2) def += 7; else if(armor===1) def += 4;
+  }
+  // класс
+  if(actor.cls==="rogue") atk = Math.round(atk*1.15);
+  if(actor.cls==="artisan") def += 5;
+  // банда (доп.урон считается в активации)
+  return {
+    atk, def,
+    hp: actor.hp,
+    hpMax: 10 + Math.floor(actor.level/2) + hpBonus,
+  };
+}
+
+function makeEnemy(level){
+  level = Math.max(1, level + rng(-1, 2));
+  const atk = 2 + Math.floor(level/2) + rng(0,3);
+  const def = Math.floor(level/3) + rng(0,2);
+  const hpMax = 10 + level*2 + rng(0,4);
+  return {
+    name: pick(["Жабер","Болотик","Квак-квак","Лягуш","Тритоныч","Жабэн","Болотный сосед","Лягвиния","Жабарь","Прыг"])+" #"+rng(10,99),
+    level, atk, def, hp:hpMax, hpMax,
+    bandChance: chance(0.3) ? (chance(0.3)?0.07:0.06) : 0,
+    bandMult: chance(0.4)? 2 : 1,
+    photo:pick(FROG_EMOJIS),
+  };
+}
+
+function attackRound(me, enemy, logArr){
+  // одновременно бьём
+  const myStats = combatStats(me);
+  const enStats = combatStats(enemy);
+
+  let myDmg = rng(Math.floor(myStats.atk/2), myStats.atk);
+  let enDmg = rng(Math.floor(enStats.atk/2), enStats.atk);
+
+  // банда
+  if(me.band){
+    const ch = (me.band.loyalty<30?0.05:me.band.loyalty<80?0.06:0.07) + (me.cls==="rogue"?0.02:0);
+    if(chance(ch)){
+      const mult = me.band.type==="heron"?2:1;
+      myDmg = Math.round(myDmg*(1+mult));
+      logArr.push("🏋️ Банда атакует! Урон ×"+(1+mult));
+      me.band.loyalty = clamp(me.band.loyalty-2,0,me.band.maxLoyalty||100);
+    }
+  }
+  if(enemy.bandChance && chance(enemy.bandChance)){
+    enDmg = Math.round(enDmg*(1+enemy.bandMult));
+    logArr.push("🦩 Банда соперника атакует! Урон ×"+(1+enemy.bandMult));
+  }
+
+  // ассасин — уклонение
+  if(me.cls==="assassin" && chance(0.10)){ enDmg=0; logArr.push("🦹 Ты уклонился!"); }
+
+  // школьное/устрашающее снаряжение — +50% урона оружия 1 ход (упрощено)
+  // crocoblock perk
+  function blockChance(actor){
+    let p=0;
+    for(const slot of ["helmet","chest","boots"]){
+      const e=actor.equip&&actor.equip[slot];
+      if(!e) continue;
+      const meta=GEAR_CRAFTS.find(g=>g.id===e.craftId);
+      if(meta && meta.perk==="crocoblock") p+=0.0333;
+    }
+    return p;
+  }
+  if(blockChance(me)>0 && chance(blockChance(me))){ enDmg=0; logArr.push("🐊 Кроко-броня поглотила удар!"); }
+
+  // защита
+  const myAbsorb = rng(0, enStats.def);
+  const enAbsorb = rng(0, myStats.def);
+  const myTaken = Math.max(0, enDmg - enAbsorb);
+  const enTaken = Math.max(0, myDmg - myAbsorb);
+
+  enemy.hp = Math.max(0, enemy.hp - enTaken);
+  me.hp    = Math.max(0, me.hp   - myTaken);
+  logArr.push(`⚔️ Ты бьёшь на ${enTaken} (удар ${myDmg}, поглощено ${myAbsorb}). Соперник бьёт на ${myTaken} (удар ${enDmg}, поглощено ${enAbsorb}).`);
+}
+
+function consumeDurability(){
+  for(const slot in S.equip){
+    const e = S.equip[slot]; if(!e) continue;
+    e.durability = Math.max(0, e.durability-1);
+    if(e.durability<=0){
+      const meta = GEAR_CRAFTS.find(g=>g.id===e.craftId);
+      log("🛠 Сломалось: "+(meta?meta.name:slot));
+      toast("Сломалось: "+(meta?meta.name:slot));
+    }
+  }
+}
+
+function runFight(meCopy, enemy){
+  const logArr=[];
+  let rounds=0;
+  while(meCopy.hp>0 && enemy.hp>0 && rounds<20){
+    attackRound(meCopy, enemy, logArr);
+    rounds++;
+  }
+  const result = (meCopy.hp>0 && enemy.hp<=0) ? "win" :
+                 (meCopy.hp<=0 && enemy.hp>0) ? "lose" :
+                 (meCopy.hp<=0 && enemy.hp<=0) ? "draw0":"draw1";
+  return {logArr, result, meHp:meCopy.hp, enHp:enemy.hp};
+}
+
+function fightAndApply(enemy, opts){
+  opts = opts||{};
+  // копируем чтобы не менять реальные значения по ходам
+  const meCopy = {...S, equip:S.equip, mods:S.mods, band:S.band?{...S.band}:null};
+  meCopy.hp = combatStats(S).hpMax;
+  const enCopy = {...enemy};
+  const r = runFight(meCopy, enCopy);
+
+  // применяем итог
+  S.hp = Math.max(0, r.meHp);
+  if(r.result==="win"){ S.wins++; }
+  else if(r.result==="lose"){ S.losses++; }
+
+  if(r.result==="lose" || r.result==="draw0"){
+    S.state = "reanim";
+    log("⚠️ Жабка нуждается в реанимации!");
+  }
+
+  consumeDurability();
+  if(S.band){
+    S.band.loyalty = clamp(S.band.loyalty-2, 0, S.band.maxLoyalty||100);
+  }
+  return r;
+}
+
+/* ===================== ОСНОВНЫЕ ДЕЙСТВИЯ ===================== */
+
+function applyXp(amount){
+  S.fill += amount;
+  while(S.fill >= S.fillNext){
+    S.fill -= S.fillNext;
+    S.level++;
+    S.fillNext = 5 + S.level*2;
+    S.hp = combatStats(S).hpMax;
+    log("✨ Уровень "+S.level+"!");
+    toast("Уровень "+S.level+"!");
+    if(S.level>S.history.topLevel) S.history.topLevel = S.level;
+  }
+  save();
+}
+
+function feed(){
+  if(S.state==="dead") return toast("Жаба мертва.");
+  if(!ready(S.cd.feed)) return toast("Покормить можно через "+fmtCD(S.cd.feed));
+  S.cd.feed = setCD(0.5); // 12ч → ~30 минут игровых
+  applyXp(1);
+  S.mood = clamp(S.mood+15, 0, S.moodMax);
+  S.bugs += rng(20,55);
+  if(S.state==="reanim" && chance(0.2)){ S.state="alive"; log("💊 Жабка очухалась после кормления."); }
+  log("🍽 Покормил жабу: +1 сытость, +15 настроения");
+  S.daily.log.feed = (S.daily.log.feed||0)+1;
+  checkAchievements();
+  save(); render();
+}
+function force(){
+  if(S.state==="dead") return toast("Жаба мертва.");
+  if(!ready(S.cd.force)) return toast("Откормить можно через "+fmtCD(S.cd.force));
+  if(S.bugs<500) return toast("Нужно 500 букашек.");
+  S.bugs -= 500;
+  S.cd.force = setCD(0.18); // ~10мин игровых
+  applyXp(5);
+  if(S.level<50) S.mood = clamp(S.mood+(S.level<30?10:0),0,S.moodMax);
+  else S.mood = clamp(S.mood-25,0,S.moodMax);
+  log("🍰 Откормил жабу за 500 буках: +5 сытости");
+  S.daily.log.force = (S.daily.log.force||0)+1;
+  save(); render();
+}
+function reanimate(){
+  if(S.state==="dead") return toast("Жаба мертва. Воскресить можно в магазине.");
+  if(S.state!=="reanim") return toast("Жабка в порядке.");
+  if(S.inv.medkit<1) return toast("Нет аптечки.");
+  S.inv.medkit--;
+  S.state="alive";
+  S.hp = combatStats(S).hpMax;
+  log("💊 Реанимировал жабку.");
+  save(); render();
+}
+function useLolipop(){
+  if(S.inv.lolipop<1) return toast("Нет леденца.");
+  S.inv.lolipop--;
+  S.mood = clamp(S.mood+25,0,S.moodMax);
+  log("🍭 Использовал леденец: +25 настроения");
+  save(); render();
+}
+function useCapsule(){
+  if(S.inv.expcap<1) return toast("Нет капсулы опыта.");
+  S.inv.expcap--;
+  applyXp(35);
+  log("🔋 Капсула: +35 сытости");
+  save(); render();
+}
+
+function renameFrog(){
+  const n = prompt("Новое имя:", S.name);
+  if(!n) return;
+  if(S.history.namedOnce && S.bugs<250) return toast("Нужно 250 буках.");
+  if(S.history.namedOnce) S.bugs -= 250;
+  S.history.namedOnce = true;
+  S.name = n.slice(0,18);
+  log("📝 Имя: "+S.name);
+  save(); render();
+}
+
+/* ===================== РАБОТА ===================== */
+
+function workStart(kind){
+  if(S.state!=="alive") return toast("Жаба не в форме.");
+  if(!ready(S.cd.work)) return toast("Работа доступна через "+fmtCD(S.cd.work));
+  if(S.workActive) return toast("Жаба уже работает.");
+  S.workActive = {kind:"basic", subkind:kind, doneAt: setCD(0.05), started: gameMinutes()}; // ~3 мин
+  log("🧑‍🍳 Отправил на работу: "+kind);
+  save(); render();
+}
+function workFinish(){
+  const w = S.workActive;
+  if(!w) return toast("Жаба не работает.");
+  if(!ready(w.doneAt)) return toast("Работа завершится через "+fmtCD(w.doneAt));
+  let report = ["🏁 Работа завершена:"];
+  if(w.kind==="basic"){
+    if(w.subkind==="canteen"){
+      const b = rng(40,90); S.bugs+=b; report.push("+"+b+" букашек");
+      if(chance(0.3)){ S.inv.snack++; report.push("+1 🍰"); }
+      if(chance(0.1)){ S.inv.medkit++; report.push("+1 💊"); }
+    } else if(w.subkind==="croupier"){
+      const b = rng(80,210); S.bugs+=b; report.push("+"+b+" букашек");
+      if(chance(0.3)){ S.inv.map++; report.push("+1 🗺"); }
+      if(chance(0.2)){ S.inv.medkit++; report.push("+1 💊"); }
+    } else if(w.subkind==="robber"){
+      const b = rng(60,160); S.bugs+=b; report.push("+"+b+" букашек");
+      if(chance(0.12) && !S.band){
+        S.band = {type:"heron",loyalty:50,maxLoyalty:100};
+        report.push("🦩 Тебе сошлась банда цапель!");
+      }
+      if(chance(0.15)){ S.state="reanim"; report.push("😵 Получил тумаков, нужна реанимация."); }
+    }
+  } else if(w.kind==="adv"){
+    // adventure career: bonus per success
+    const subk = w.subkind;
+    const successes = rng(5,12);
+    const b = rng(120,260); S.bugs+=b; report.push("+"+b+" букашек ("+successes+" успехов)");
+    if(subk==="cafeteria"){
+      if(chance(0.5)){ S.inv.snack += 2; report.push("+2 🍰"); }
+    } else if(subk==="casino"){
+      if(chance(0.5)){ S.inv.map++; report.push("+1 🗺"); }
+      if(chance(0.3)){ S.inv.medkit++; report.push("+1 💊"); }
+    } else if(subk==="bank"){
+      if(chance(0.4)){ S.inv.gear++; report.push("+1 ⚙"); }
+      if(chance(0.15) && !S.band){ S.band={type:"heron",loyalty:50,maxLoyalty:100}; report.push("🦩 Банда цапель!"); }
+    }
+  }
+  S.workActive = null;
+  S.cd.work = setCD(0.13); // ~8 мин (отдых) для теста
+  S.daily.log.work = (S.daily.log.work||0)+1;
+  log(report.join(" "));
+  save(); render();
+}
+function adventureStart(sub){
+  if(S.state!=="alive") return toast("Жаба не в форме.");
+  if(!ready(S.cd.walk)) return toast("Поход через "+fmtCD(S.cd.walk));
+  if(S.workActive) return toast("Жаба занята.");
+  S.workActive = {kind:"adv", subkind:sub, doneAt: setCD(0.08), started: gameMinutes()};
+  log("🚶 Поход: "+sub);
+  S.cd.walk = setCD(0.13);
+  save(); render();
+}
+
+/* ===================== АРЕНА ===================== */
+
+function arenaRegister(){
+  if(S.state!=="alive") return toast("Не в форме.");
+  if(S.arena.reg) return toast("Уже зарегистрирован.");
+  if(!ready(S.cd.arenaReg)) return toast("Регистрация через "+fmtCD(S.cd.arenaReg));
+  let cost=100;
+  if(S.quickRegFreeLeft>0){ cost=0; S.quickRegFreeLeft--; }
+  if(S.bugs<cost) return toast("Нужно "+cost+" буках.");
+  S.bugs -= cost;
+  S.arena.reg = true;
+  S.arena.regTime = gameMinutes();
+  S.arena.atk = false;
+  S.cd.arenaReg = setCD(0.05);
+  S.cd.arenaAtk = setCD(0.04);
+  log("⚔️ Зарегистрирован на арене (стоимость "+cost+")");
+  save(); render();
+}
+function arenaAttack(){
+  if(!S.arena.reg) return toast("Сначала зарегистрируйся.");
+  if(S.arena.atk) return toast("Уже атаковал в этом часу.");
+  if(S.state!=="alive") return toast("Не в форме.");
+  const opp = makeEnemy(S.level);
+  const r = fightAndApply(opp);
+  S.arena.atk = true;
+  let payout=0, msg="";
+  if(r.result==="win"){
+    payout = rng(120,300);
+    S.bugs += payout;
+    S.arena.wins++;
+    msg = "🏆 Победа на арене! +"+payout+" 🐞";
+    if(chance(0.1)) { applyAmulet("am_heron"); msg+=" + 📿 Кулон цапель!"; }
+    if(chance(0.4)){ S.inv.map++; msg+=" +1 🗺"; }
+  } else if(r.result==="lose"){
+    S.arena.losses++;
+    msg = "💔 Поражение на арене.";
+  } else { msg = "⚖️ Ничья на арене."; }
+  log(msg+"\n"+r.logArr.join("\n"));
+  S.daily.log.arena = (S.daily.log.arena||0)+1;
+  // reset reg in 1 hour or now
+  setTimeout(()=>{ S.arena.reg=false; S.arena.atk=false; save(); },50);
+  showFightModal("Арена: "+opp.name+" ур."+opp.level, r);
+  save();
+}
+
+function applyAmulet(id){
+  const a = AMULETS.find(x=>x.id===id);
+  if(!a) return;
+  S.amulet = {id, expiresAt: setCD(a.days*24/24)}; // days→мин, чуть сжато: 24 ч игровых = 24 мин
+  log("📿 Кулон активен: "+a.name);
+}
+
+/* ===================== ПОДЗЕМЕЛЬЕ ===================== */
+
+function dungeonStart(id){
+  const d = DUNGEONS.find(x=>x.id===id);
+  if(!d) return;
+  if(S.bugs<d.cost) return toast("Нужно "+d.cost+" буках.");
+  if(S.state!=="alive") return toast("Не в форме.");
+  if(!ready(S.cd.dungeon)) return toast("Подземелье через "+fmtCD(S.cd.dungeon));
+  S.bugs -= d.cost;
+  S.cd.dungeon = setCD(0.08);
+  const boss = {
+    name:d.boss, level:S.level+rng(0,3),
+    atk:d.bossAtk, def:d.bossDef, hp:d.bossHp, hpMax:d.bossHp,
+    photo:"👹", bandChance:0
+  };
+  const meCopy = {...S, equip:S.equip, mods:S.mods, band:S.band?{...S.band}:null};
+  meCopy.hp = combatStats(S).hpMax;
+  // ремесленник: больше урона по боссам
+  if(S.cls==="artisan") boss.def = Math.max(0,boss.def-2);
+  const r = runFight(meCopy, boss);
+  S.hp = Math.max(0,r.meHp);
+  if(r.result==="win"){
+    S.wins++;
+    log("🏰 Победа в "+d.name+" над "+d.boss);
+    let drops=[];
+    for(const k in d.drops){
+      const v = d.drops[k];
+      if(v<=1 && v>0){
+        if(chance(v)){ S.inv[k]=(S.inv[k]||0)+1; drops.push("+1 "+k); }
+      } else {
+        S.inv[k]=(S.inv[k]||0)+v; drops.push("+"+v+" "+k);
+      }
+    }
+    if(d.id==="event"){ S.inv.snow = (S.inv.snow||0)+rng(1,3); drops.push("+❄️"); }
+    log("Награды: "+drops.join(", "));
+    S.daily.log.dung = (S.daily.log.dung||0)+1;
+    showFightModal("Подземелье: "+d.boss, r, drops);
+  } else {
+    consumeDurability();
+    if(r.result==="lose") S.state="reanim";
+    log("☠️ Поражение в "+d.name);
+    showFightModal("Подземелье: "+d.boss, r);
+  }
+  save(); render();
+}
+
+/* ===================== КЛАН ===================== */
+
+function clanCreate(){
+  const nm = prompt("Имя клана:", "Болотники");
+  if(!nm) return;
+  if(S.bugs<1500) return toast("Нужно 1500 буках.");
+  S.bugs -= 1500;
+  S.clan = {
+    name: nm.slice(0,20),
+    members: [
+      {name:"NPC-1 Лягвиния", level:rng(5,15)},
+      {name:"NPC-2 Жабарь", level:rng(5,15)},
+      {name:"NPC-3 Болотик", level:rng(5,15)},
+      {name:"NPC-4 Квак",  level:rng(5,15)},
+    ],
+    lvl:1, exp:0, points:0, league:"wood", warAt:0, season:0, attacks:0, wins:0
+  };
+  log("🛡 Создан клан "+nm);
+  save(); render();
+}
+
+function clanWar(){
+  if(!S.clan) return toast("Нет клана.");
+  if(S.inv.map<1 && S.inv.mapPrem<1) return toast("Нужна карта болота.");
+  if(!ready(S.cd.mapCard)) return toast("Война через "+fmtCD(S.cd.mapCard));
+  // расходуем карту
+  if(S.inv.map>0) S.inv.map--; else S.inv.mapPrem--;
+  // 4 NPC товарищи бьются параллельно, мы делаем свой бой
+  const enemyClan = ["Зелёные","Прыгуны","Цапли-крёстные","Болотный синдикат"][rng(0,3)];
+  const opp = makeEnemy(S.level+1);
+  opp.name = enemyClan+" #"+rng(10,99);
+  const r = fightAndApply(opp);
+  let teamWins = (r.result==="win"?1:0);
+  // npc-результаты
+  for(const m of S.clan.members){
+    if(chance(0.55)) teamWins++;
+  }
+  const totalWins = teamWins;
+  const totalLoss = 5-totalWins;
+  let pts=0;
+  if(totalWins>totalLoss){ pts=3; S.clan.wins++; }
+  else if(totalWins===totalLoss) pts=1;
+  S.clan.points += pts;
+  S.clan.attacks++;
+  S.clan.exp += 30;
+  if(S.clan.exp>=100*S.clan.lvl){ S.clan.exp=0; S.clan.lvl++; log("🛡 Клан повысил уровень → "+S.clan.lvl); }
+  log(`⚔️ Война клана: ${totalWins}:${totalLoss} — +${pts} очк.`);
+  S.cd.mapCard = setCD(0.13);
+  showFightModal("Клановая война", r, [`Счёт: ${totalWins}:${totalLoss}`, `+${pts} клан-очк.`]);
+  save();
+}
+
+function clanMapWalk(){
+  if(!S.clan) return toast("Нет клана.");
+  if(!ready(S.cd.mapCard)) return toast("Через "+fmtCD(S.cd.mapCard));
+  S.cd.mapCard = setCD(0.13);
+  if(chance(0.7)){ S.inv.map++; log("🗺 Принёс карту болота."); }
+  else log("🚶 Заблудился, карты нет.");
+  save(); render();
+}
+
+/* ===================== БРАК / ЖАБЁНОК ===================== */
+
+function marryNPC(){
+  if(S.spouse) return toast("Ты уже в браке.");
+  if(S.bugs<500) return toast("Нужно 500 буках.");
+  const partners = ["Лягушка Маша","Жаб Афоня","Квакушка Лиля","Жабалина","Жаб Ален","Жабьян"];
+  const n = prompt("Имя партнёра (NPC):", pick(partners));
+  if(!n) return;
+  S.bugs -= 500;
+  S.spouse = {name:n.slice(0,18), since:gameMinutes(), gifts:0, faithful:chance(0.85), lastRewardAt:gameMinutes()};
+  log("💍 Заключён брак с "+n);
+  save(); render();
+}
+function divorce(){
+  if(!S.spouse) return toast("Не в браке.");
+  if(S.bugs<500) return toast("Нужно 500 буках.");
+  S.bugs -= 500;
+  if(S.child){ log("💔 Развод. Жабёнок ушёл..."); S.child=null; }
+  S.spouse=null;
+  save(); render();
+}
+function brakReward(){
+  if(!S.spouse) return toast("Не в браке.");
+  if(gameMinutes() - (S.spouse.lastRewardAt||0) < 24*5/24*5) {
+    // 5 дней игровых = 5 минут реально
+  }
+  if(gameMinutes() - (S.spouse.lastRewardAt||0) < 5){ return toast("Ещё рано."); }
+  S.spouse.lastRewardAt = gameMinutes();
+  S.inv.lolipop += 3;
+  applyXp(5);
+  log("🎁 Брак-вознаграждение: +3 🍭, +5 сытости");
+  save(); render();
+}
+function checkFaith(){
+  if(!S.spouse) return toast("Не в браке.");
+  modal(`<h3>🔎 Проверка верности</h3>
+    <p>${S.spouse.faithful ? "✨ Партнёр верен тебе." : "💥 Партнёр гулял в другом чате! Сюрприз."}</p>
+    <button class="btn" onclick="closeModal()">Ок</button>`);
+}
+function adoptChild(){
+  if(!S.spouse) return toast("Нужен брак.");
+  if(gameMinutes() - S.spouse.since < 11){ return toast("Брак должен длиться 11 минут игровых."); }
+  if(S.child) return toast("Уже есть жабёнок.");
+  S.child = {name:"Жабёнок", level:1, fill:0, fillMax:5, mood:30, kg:null, brawlReadyAt:0, mood_emoji:"😐"};
+  log("👶 Взял жабёнка");
+  save(); render();
+}
+function feedChild(){
+  if(!S.child) return;
+  if(S.bugs<75) return toast("Нужно 75 буках.");
+  S.bugs-=75;
+  S.child.fill++;
+  if(S.child.fill>=S.child.fillMax){ S.child.fill=0; S.child.level++; S.child.fillMax+=2; log("👶 Жабёнок повысил уровень → "+S.child.level); }
+  save(); render();
+}
+function kindergarten(){
+  if(!S.child) return;
+  if(S.child.kg) return toast("Уже в саду.");
+  S.child.kg = {start: gameMinutes(), done: setCD(0.10)};
+  log("🏡 Жабёнок в детсаду.");
+  save(); render();
+}
+function pickupChild(){
+  if(!S.child||!S.child.kg) return;
+  if(!ready(S.child.kg.done)) return toast("Готов через "+fmtCD(S.child.kg.done));
+  S.child.kg=null;
+  applyXp(2);
+  S.bugs += 50;
+  S.child.brawlReadyAt = setCD(0.04);
+  log("🏡 Забрал жабёнка: +2 сыт, +50 🐞");
+  save(); render();
+}
+function childBrawl(){
+  if(!S.child) return;
+  if(!ready(S.child.brawlReadyAt)) return toast("Махач через "+fmtCD(S.child.brawlReadyAt));
+  const win = chance(0.5 + S.child.level*0.03);
+  if(win){
+    S.boost = {id:"plevok", expiresAt:setCD(0.4)};
+    applyXp(3);
+    log("🥊 Жабёнок победил в махаче. Бафф «Плевок жабёнка» 24ч!");
+  } else {
+    S.mood = clamp(S.mood-10,0,S.moodMax);
+    log("🥊 Жабёнок проиграл махач.");
+  }
+  S.child.brawlReadyAt = setCD(0.4);
+  save(); render();
+}
+
+/* ===================== МИНИ-ИГРЫ ===================== */
+
+function roulette(amount, color){
+  amount = parseInt(amount)||0;
+  if(amount<10) return toast("Мин. ставка 10.");
+  if(S.bugs<amount) return toast("Не хватает.");
+  S.bugs -= amount;
+  const roll = Math.random();
+  let result, mult=0;
+  if(roll<0.05){ result="green"; mult=14; }
+  else if(roll<0.525){ result="red"; mult = color==="red"?1.5:0; }
+  else { result="black"; mult = color==="black"?1.5:0; }
+  if(color==="green" && result==="green") mult=14;
+  const win = Math.floor(amount*mult);
+  S.bugs += win;
+  log(`🎰 Рулетка ${color}→${result}: ${win>0?"+":""}${win-amount} буках`);
+  toast(`Выпало ${result}. ${win>0?"+"+win:"проигрыш"}`);
+  save(); render();
+}
+function ksp(stake){
+  stake = parseInt(stake)||0;
+  if(stake<10) return toast("Мин. ставка 10.");
+  if(S.bugs<stake) return toast("Не хватает.");
+  const my = prompt("Камень (1), ножницы (2), бумага (3)?","1");
+  if(!["1","2","3"].includes(my)) return;
+  const npc = rng(1,3);
+  let res;
+  if(+my===npc) res="draw";
+  else if((my==="1"&&npc===2)||(my==="2"&&npc===3)||(my==="3"&&npc===1)) res="win";
+  else res="lose";
+  if(res==="win"){ const w = Math.round(stake*0.9); S.bugs+=w; log("✊ КМН: победа +"+w); }
+  else if(res==="lose"){ S.bugs-=stake; log("✊ КМН: поражение -"+stake); }
+  else log("✊ КМН: ничья");
+  save(); render();
+}
+function race(stake){
+  stake = parseInt(stake)||0;
+  if(stake<10) return toast("Мин. ставка 10.");
+  if(S.bugs<stake) return toast("Не хватает.");
+  S.bugs-=stake;
+  const beerBonus = S.inv.beer>0 ? 0.5 : 0;
+  const win = chance(0.34 + beerBonus*0.4); // 0.34 без пивас, ~0.54 с
+  if(win){
+    const w = Math.round(stake*4*0.85);
+    S.bugs+=w;
+    log("🏁 Гонка: победа +"+w);
+  } else log("🏁 Гонка: проигрыш -"+stake);
+  save(); render();
+}
+function party(){
+  if(!ready(S.cd.party)) return toast("Туса через "+fmtCD(S.cd.party));
+  const cost = S.band?250:150;
+  if(S.bugs<cost) return toast("Нужно "+cost+" буках.");
+  S.bugs-=cost;
+  S.cd.party = setCD(2); // раз в "сутки"
+  const otherFrogs = rng(2,6);
+  S.mood = clamp(S.mood + 5*otherFrogs, 0, S.moodMax);
+  applyXp(3);
+  if(S.band) S.band.loyalty = clamp(S.band.loyalty+10,0,S.band.maxLoyalty||100);
+  log("💃 Туса: +"+(5*otherFrogs)+" настроения, +3 сыт.");
+  save(); render();
+}
+
+function robbery(){
+  if(!ready(S.cd.robbery)) return toast("Ограбление через "+fmtCD(S.cd.robbery));
+  S.cd.robbery = setCD(0.3);
+  // мини-квест: 3 задания
+  const tasks = [
+    {q:"Какое число задумано: 4729?",a:["4729","4192","4279"],right:0},
+    {q:"Какой провод резать?",a:["Красный","Синий","Зелёный"],right:rng(0,2)},
+    {q:"Куда вставить отмычку?",a:["В верхнюю скважину","В нижнюю","В боковую"],right:rng(0,2)},
+  ];
+  let html = "<h3>🥷 Ограбление столовой</h3>";
+  tasks.forEach((t,i)=>{
+    html += "<p>"+t.q+"</p><div>";
+    t.a.forEach((opt,j)=>{ html += `<button class="btn alt small" data-i="${i}" data-j="${j}">${opt}</button> `;});
+    html += `<span id="rr${i}"></span></div>`;
+  });
+  html += `<p><button class="btn" id="rrFin">Завершить</button> <button class="btn alt" onclick="closeModal()">Выйти</button></p>`;
+  modal(html);
+  const picks = [null,null,null];
+  document.querySelectorAll("#modalBox [data-i]").forEach(b=>{
+    b.onclick = ()=>{
+      const i = +b.dataset.i, j=+b.dataset.j;
+      picks[i]=j;
+      document.getElementById("rr"+i).textContent = "выбрано: "+b.textContent;
+    };
+  });
+  document.getElementById("rrFin").onclick = ()=>{
+    let s = 0;
+    for(let i=0;i<3;i++) if(picks[i]===tasks[i].right) s++;
+    // ассасин — улучшение отмычки
+    if(S.cls==="assassin" && s===2) s = 3;
+    let report=`Решено ${s}/3.`;
+    if(s>=2){
+      const b = rng(200,360); S.bugs+=b;
+      const fil = rng(2,9); applyXp(Math.min(2,fil));
+      report += " +"+b+" 🐞";
+      if(chance(0.3)){ S.inv.herb++; report+=" +1 🌿"; }
+    } else {
+      report += " Провал!";
+      S.state="reanim";
+    }
+    log("🥷 Ограбление: "+report);
+    closeModal(); save(); render();
+  };
+}
+
+/* ===================== ДУЭЛЬ / NPC ===================== */
+
+function duel(){
+  if(!ready(S.cd.duel)) return toast("Дуэль через "+fmtCD(S.cd.duel));
+  if(S.state!=="alive") return toast("Не в форме.");
+  S.cd.duel = setCD(0.07);
+  const opp = makeEnemy(S.level);
+  const r = fightAndApply(opp);
+  if(r.result==="win"){
+    S.bugs += 50;
+    S.mood = clamp(S.mood+15,0,S.moodMax);
+    log("🥊 Дуэль выиграна: +50 🐞, +15 настроения");
+    S.daily.log.win = (S.daily.log.win||0)+1;
+  } else if(r.result==="lose") log("🥊 Дуэль проиграна.");
+  else log("🥊 Дуэль: ничья.");
+  showFightModal("Дуэль: "+opp.name, r);
+  save();
+}
+
+function showFightModal(title, r, extras){
+  let html = `<h3>${title}</h3><div style="font-size:13px;font-family:monospace;background:#0a1410;padding:8px;border:1px solid var(--line);border-radius:8px;max-height:220px;overflow:auto">${r.logArr.map(x=>"• "+x).join("<br>")}</div>`;
+  html += `<p>Результат: <b>${ {win:"🏆 Победа",lose:"💔 Поражение",draw0:"⚖️ Ничья (0:0)",draw1:"⚖️ Ничья"}[r.result] }</b></p>`;
+  if(extras) html += `<p>${extras.join("<br>")}</p>`;
+  html += `<button class="btn" onclick="closeModal()">Ок</button>`;
+  modal(html);
+}
+
+/* ===================== СНАРЯЖЕНИЕ / КРАФТ ===================== */
+
+function craft(id){
+  const c = GEAR_CRAFTS.find(g=>g.id===id);
+  if(!c) return;
+  for(const k in c.cost){
+    if((k==="bugs"?S.bugs:(S.inv[k]||0)) < c.cost[k]){
+      return toast("Не хватает "+k);
+    }
+  }
+  for(const k in c.cost){
+    if(k==="bugs") S.bugs -= c.cost[k];
+    else S.inv[k] -= c.cost[k];
+  }
+  S.equip[c.slot] = {craftId:c.id, durability:c.dur};
+  log("🔨 Скрафтил: "+c.name);
+  save(); render();
+}
+function repair(slot){
+  const e = S.equip[slot]; if(!e) return;
+  const meta = GEAR_CRAFTS.find(g=>g.id===e.craftId);
+  if(!meta) return;
+  if(e.durability<=0) return toast("Сломано окончательно.");
+  const cost = Math.max(20, meta.cost.bugs*0.1)|0;
+  if(S.bugs<cost) return toast("Нужно "+cost+" буках.");
+  S.bugs -= cost;
+  e.durability = Math.min(meta.dur, e.durability+3);
+  log("🛠 Починил "+meta.name+" за "+cost+" 🐞");
+  save(); render();
+}
+function applyMod(slot, mod){
+  if(S.gems<1) return toast("Нет жабогемов.");
+  S.mods[slot] = S.mods[slot]||[];
+  if(S.mods[slot].length>=3) return toast("Уже 3 модификатора.");
+  S.gems--;
+  S.mods[slot].push(mod);
+  log("💠 Модификатор "+mod+" → "+slot);
+  save(); render();
+}
+
+/* ===================== МАГАЗИН ===================== */
+
+function buyChest(id){
+  const c = CHEST_TYPES[id];
+  if(!c) return;
+  if(S.rub<c.rub) return toast("Не хватает донат-баланса. Пополни.");
+  S.rub -= c.rub;
+  let realId = id;
+  if(id==="random") realId = pick(["money","gear","mystery","fill"]);
+  const reward = openChest(realId);
+  log("📦 Открыл "+CHEST_TYPES[realId].label+": "+reward.join(", "));
+  save(); render();
+}
+function openChest(id){
+  const out=[];
+  if(id==="money"){
+    const b = rng(1000,2500); S.bugs+=b; out.push("+"+b+" 🐞");
+  } else if(id==="gear"){
+    const a=rng(2,5),b=rng(2,5),c=rng(1,3),d=rng(0,3),e=rng(1,3);
+    S.inv.gear+=a; S.inv.herb+=b; S.inv.lily+=c; S.inv.beak+=d; S.gems+=e;
+    out.push("+"+a+" ⚙",+b+" 🌿",+c+" 🥬",+d+" 🦴",+e+" 💠");
+  } else if(id==="mystery"){
+    const r = rng(0,3);
+    if(r===0){ S.inv.map+=rng(1,3); out.push("+карты"); }
+    else if(r===1){ const b=rng(500,2500); S.bugs+=b; out.push("+"+b+" 🐞"); }
+    else if(r===2){ S.inv.tape++; out.push("+🧿"); }
+    else { S.inv.expcap++; out.push("+🔋"); }
+  } else if(id==="fill"){
+    const f = rng(3,12);
+    applyXp(f); out.push("+"+f+" сытости");
+  }
+  return out;
+}
+function buyPrem(item){
+  if(item==="beer"){
+    if(S.bugs<750) return toast("Нужно 750.");
+    if(S.inv.beer>0) return toast("Уже куплено.");
+    S.bugs-=750; S.inv.beer=1; log("🍺 Купил пивас.");
+  } else if(item==="dragonfly"){
+    if(S.bugs<2000) return toast("Нужно 2000.");
+    if(S.inv.dragonfly>0) return toast("Уже куплено.");
+    S.bugs-=2000; S.inv.dragonfly=1; log("🦟 Купил стрекозюлю удачи (+10% букашек).");
+  } else if(item==="medkit"){
+    if(S.bugs<300) return toast("Нужно 300.");
+    S.bugs-=300; S.inv.medkit++; log("💊 Купил аптечку.");
+  } else if(item==="lolipop"){
+    if(S.bugs<300) return toast("Нужно 300.");
+    S.bugs-=300; S.inv.lolipop++; log("🍭 Купил леденец.");
+  } else if(item==="map"){
+    if(S.rub<20) return toast("Нужно 20₽.");
+    S.rub-=20; S.inv.mapPrem++; log("🗺 Купил несгораемую карту.");
+  }
+  save(); render();
+}
+function donate(amount){
+  S.rub += amount;
+  log("💸 Пополнен донат-баланс на "+amount+"₽");
+  save(); render();
+}
+function rubToBugs(rub){
+  rub = parseInt(rub)||0;
+  if(S.rub<rub) return toast("Не хватает донат-баланса.");
+  S.rub -= rub;
+  S.bugs += rub*35;
+  log("💱 "+rub+"₽ → "+(rub*35)+" 🐞");
+  save(); render();
+}
+function buyPrime(){
+  if(S.rub<89) return toast("Нужно 89₽.");
+  if(S.history.prime) return toast("Уже Prime.");
+  S.rub-=89; S.history.prime=true;
+  log("👑 Куплен Prime!");
+  save(); render();
+}
+function resurrect(){
+  if(S.state!=="dead") return toast("Жабка жива.");
+  if(S.rub<100) return toast("Нужно 100₽.");
+  S.rub-=100; S.state="alive"; S.hp=combatStats(S).hpMax;
+  log("✨ Жабка воскрешена.");
+  save(); render();
+}
+
+/* ===================== АЧИВКИ ===================== */
+
+const ACH_DEFS = [
+  {id:"feeder",   name:"🍽 Кормилец",   tiers:[10,50,200], type:"feed"},
+  {id:"warrior",  name:"⚔️ Воин",      tiers:[5,30,100],  type:"wins"},
+  {id:"rich",     name:"💰 Магнат",    tiers:[500,5000,50000], type:"bugs"},
+  {id:"leveler",  name:"⭐ Прокачка", tiers:[5,15,30],   type:"level"},
+  {id:"clanboss", name:"🛡 Лидер",     tiers:[1,5,15],   type:"clanWins"},
+  {id:"champion", name:"🥇 Чемпион",   tiers:[1,2,3],     type:"champion"},
+];
+function checkAchievements(){
+  for(const a of ACH_DEFS){
+    let v=0;
+    if(a.type==="feed") v=S.daily.log._allFeed = (S.daily.log._allFeed||0);
+    else if(a.type==="wins") v=S.wins;
+    else if(a.type==="bugs") v=Math.max(S.bugs, S.history.topBugs||0);
+    else if(a.type==="level") v=S.level;
+    else if(a.type==="clanWins") v=S.clan?S.clan.wins:0;
+    else if(a.type==="champion") v=S.history.championLvl||0;
+    let tier=0;
+    for(let i=0;i<3;i++) if(v>=a.tiers[i]) tier=i+1;
+    if(tier > (S.achievements[a.id]||0)){
+      S.achievements[a.id]=tier;
+      log("🏅 Получена ачивка "+a.name+" "+["бронза","серебро","золото"][tier-1]);
+      if(tier===3){ S.inv.expcap++; log("🔋 +1 капсула опыта"); }
+    }
+  }
+  if(S.bugs>S.history.topBugs) S.history.topBugs = S.bugs;
+}
+
+/* ===================== ДЕЙЛИКИ ===================== */
+
+function rolloverDaily(){
+  const day = Math.floor(gameMinutes()/120); // "сутки" = 2 минуты игровых = 120 игровых минут? нет.
+  // Упростим: каждые 240 игровых минут (≈ 4 реальных) — новый день
+  const realDay = Math.floor(gameMinutes()/240);
+  if(S.daily.date!==realDay){
+    if(S.daily.date!==0){
+      // оценим вчерашний прогресс
+      let allDone = true;
+      for(const d of DAILIES){
+        const v = S.daily.log[d.type]||0;
+        if(v<d.need){ allDone=false; break; }
+      }
+      if(allDone){
+        S.daily.streak++;
+        if(S.daily.streak>=14) S.daily.status="gold";
+        else if(S.daily.streak>=7) S.daily.status="silver";
+        else if(S.daily.streak>=3) S.daily.status="bronze";
+        else S.daily.status="green";
+      } else { S.daily.streak=0; S.daily.status="green"; }
+    }
+    S.daily.date = realDay;
+    S.daily.log = {_allFeed: S.daily.log._allFeed||0};
+    S.daily.claimed = {};
+    log("🗓 Новый день. Дейлики обновлены.");
+  }
+}
+
+function claimDaily(id){
+  const d = DAILIES.find(x=>x.id===id);
+  if(!d) return;
+  if(S.daily.claimed[id]) return toast("Уже забрано.");
+  const v = S.daily.log[d.type]||0;
+  if(v<d.need) return toast("Условие не выполнено.");
+  S.daily.claimed[id]=1;
+  for(const k in d.reward){
+    if(k==="bugs") S.bugs+=d.reward[k];
+    else if(k==="gems") S.gems = clamp(S.gems+d.reward[k],0,50);
+    else S.inv[k]=(S.inv[k]||0)+d.reward[k];
+  }
+  if(S.daily.status==="silver") S.inv.map++;
+  if(S.daily.status==="gold") S.inv.tape++;
+  if(S.daily.status==="bronze") S.gems = clamp(S.gems+1,0,50);
+  log("🎁 Дейли: "+d.txt);
+  save(); render();
+}
+
+/* ===================== ТИК ===================== */
+
+function tick(){
+  // настроение медленно падает
+  if(S.state!=="dead"){
+    if(gameMinutes()%5===0) S.mood = clamp(S.mood-1,0,S.moodMax);
+  }
+  // долго не кормили — смерть (30 дней игровых = 30*24 минут)
+  // В тестовой версии — если 60 игровых минут без кормления, жаба погибает
+  // (имитация 30 дней реального бота, ускоренная)
+  // ... пропускаем суровость для теста
+  rolloverDaily();
+  // авто-сброс арена-регистрации каждые "час" (60 игровых минут)
+  if(gameMinutes()%60===0){
+    S.arena.reg = false;
+    S.arena.atk = false;
+  }
+  // классы — пассивный апгрейд через таймеры
+  if(S.cls!=="none" && S.classBoughtAt && S.clsLvl===1 && gameMinutes()-S.classBoughtAt > 60){
+    // можно прокачать
+  }
+  save();
+  renderHud();
+}
+
+/* ===================== КЛАССЫ ===================== */
+
+function pickClass(c){
+  if(S.level<5) return toast("Нужен 5+ уровень.");
+  if(S.cls!=="none") return toast("Класс уже выбран. Смени в магазине.");
+  if(S.bugs<1000) return toast("Нужно 1000 буках.");
+  S.bugs -= 1000;
+  S.cls = c;
+  S.clsLvl = 1;
+  S.classBoughtAt = gameMinutes();
+  log("🎓 Класс: "+CLASSES[c].name);
+  save(); render();
+}
+function classUp(){
+  if(S.cls==="none") return;
+  if(S.clsLvl===1){
+    if(S.bugs<7500) return toast("Нужно 7500 буках.");
+    if(gameMinutes()-S.classBoughtAt < 30) return toast("Подожди.");
+    S.bugs -= 7500; S.clsLvl=2; S.classBoughtAt=gameMinutes();
+    log("🎓 Класс прокачан до 2");
+  } else if(S.clsLvl===2){
+    if(S.bugs<10000) return toast("Нужно 10000 буках.");
+    if(gameMinutes()-S.classBoughtAt < 45) return toast("Подожди.");
+    S.bugs -= 10000; S.clsLvl=3; log("🎓 Класс прокачан до 3 (макс)");
+  }
+  save(); render();
+}
+function changeClass(reset){
+  if(reset){
+    if(S.bugs<5000) return toast("5000 буках.");
+    S.bugs-=5000; S.cls="none"; S.clsLvl=0; log("Класс сброшен.");
+  } else {
+    if(S.bugs<20000) return toast("20000 буках.");
+    S.bugs-=20000; S.cls="none"; log("Класс снят (уровень сохранён).");
+  }
+  save(); render();
+}
+
+/* ===================== RP-команды ===================== */
+
+function rp(verb){
+  const v = RP_VERBS.find(x=>x[0]===verb);
+  if(!v) return;
+  S.mood = clamp(S.mood + v[2], 0, S.moodMax);
+  log(v[1]);
+  save(); render();
+}
+
+/* ===================== СОБРАТЬ БАНДУ ===================== */
+
+function takeFrog(){
+  S.inv.frogling = (S.inv.frogling||0)+1;
+  log("🐸 Поймал жабульку с рассылки. ("+S.inv.frogling+"/10)");
+  if(S.inv.frogling>=10){
+    S.inv.frogling -= 10;
+    if(!S.band){
+      S.band = {type:"gang", loyalty:50, maxLoyalty:100};
+      log("🏋️ Собрана Лягушачья братва!");
+    } else log("🐸 +1 банда уже была.");
+  }
+  save(); render();
+}
+function feedBand(){
+  if(!S.band) return toast("Нет банды.");
+  if(S.inv.lolipop<1) return toast("Нет леденца.");
+  S.inv.lolipop--;
+  S.band.loyalty = clamp(S.band.loyalty+10, 0, S.band.maxLoyalty||100);
+  log("🏋️ Банда довольна: +10 верности");
+  save(); render();
+}
+
+/* ===================== TOP / СОРЕВНОВАНИЯ ===================== */
+
+function getTopBoard(){
+  // случайные NPC + игрок
+  const pool = [];
+  for(let i=0;i<9;i++){
+    pool.push({name:pick(["Барсук","Шрек","Тритон","Кваквон","Жабэн","Лиля","Пепе","Лягуш","Прыг","Гермиона"])+" #"+rng(10,99), wins:rng(5,80), level:rng(5,40)});
+  }
+  pool.push({name:"⭐ "+S.name+" (ты)", wins:S.wins+rng(0,2), level:S.level});
+  pool.sort((a,b)=>b.wins-a.wins);
+  return pool.slice(0,10);
+}
+
+/* ===================== РЕНДЕР ===================== */
+
+const TABS = [
+  {id:"pet",   label:"🐸 Моя жаба"},
+  {id:"work",  label:"🧑‍🍳 Работа"},
+  {id:"fight", label:"⚔️ Бой / Арена / Подземелья"},
+  {id:"clan",  label:"🛡 Клан"},
+  {id:"family",label:"💍 Семья / Жабёнок"},
+  {id:"games", label:"🎰 Мини-игры"},
+  {id:"gear",  label:"🛡 Снаряжение"},
+  {id:"inv",   label:"🎒 Инвентарь"},
+  {id:"shop",  label:"🛒 Магазин / Донат"},
+  {id:"daily", label:"📋 Дейли / Ачивки"},
+  {id:"chat",  label:"💬 Чат / Лог"},
+  {id:"sets",  label:"⚙ Настройки"},
+];
+let currentTab = "pet";
+
+function renderTabs(){
+  const c = document.getElementById("tabs");
+  c.innerHTML = TABS.map(t=>`<button class="${t.id===currentTab?"active":""}" data-tab="${t.id}">${t.label}</button>`).join("");
+  c.querySelectorAll("button").forEach(b=> b.onclick = ()=>{ currentTab=b.dataset.tab; render(); });
+}
+
+function renderHud(){
+  document.getElementById("hudBugs").textContent = S.bugs;
+  document.getElementById("hudGems").textContent = S.gems;
+  document.getElementById("hudRub").textContent = S.rub;
+  document.getElementById("hudClock").textContent = fmtClock();
+  document.getElementById("dayPill").textContent = "День "+(Math.floor(gameMinutes()/240)+1);
+}
+
+function bar(v,m, cls){
+  return `<div class="bar ${cls||""}"><div style="width:${clamp(v*100/m,0,100)}%"></div></div>`;
+}
+
+function petCardHtml(){
+  const cs = combatStats(S);
+  let moodEmoji="😐";
+  if(S.mood>=450) moodEmoji="🤩";
+  else if(S.mood>=350) moodEmoji="😋";
+  else if(S.mood>=200) moodEmoji="🙂";
+  else if(S.mood>=100) moodEmoji="😐";
+  else if(S.mood>=50) moodEmoji="😢";
+  else moodEmoji="😡";
+  return `
+    <div class="pet-card">
+      <div class="pet-photo"><div class="frog-emoji">${S.photo||"🐸"}</div></div>
+      <div class="pet-info">
+        <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+          <h2 style="margin:0;border:0;padding:0">🐸 ${S.name}</h2>
+          <span class="pill ${S.state==="alive"?"good":S.state==="reanim"?"warn":"bad"}">${S.state==="alive"?"Живая":S.state==="reanim"?"Нужна реанимация":"Мёртвая"}</span>
+          ${S.history.prime?'<span class="pill gold">👑 Prime</span>':""}
+          ${S.cls!=="none"?`<span class="pill">${CLASSES[S.cls].name} ${S.clsLvl||0}</span>`:""}
+        </div>
+        <div class="stat"><span class="lbl">⭐ Уровень</span> <span class="val">${S.level}</span></div>
+        <div class="stat"><span class="lbl">🍰 Сытость</span> <span class="val">${S.fill}/${S.fillNext}</span></div>${bar(S.fill,S.fillNext)}
+        <div class="stat"><span class="lbl">${moodEmoji} Настроение</span> <span class="val">${S.mood}/${S.moodMax}</span></div>${bar(S.mood,S.moodMax,"mood")}
+        <div class="stat"><span class="lbl">❤️ HP</span> <span class="val">${S.hp}/${cs.hpMax}</span></div>${bar(S.hp,cs.hpMax,"hp")}
+        <div class="row" style="margin-top:6px">
+          <div class="col"><div class="stat"><span class="lbl">⚔️ Атака</span><span class="val">${cs.atk}</span></div></div>
+          <div class="col"><div class="stat"><span class="lbl">🛡 Защита</span><span class="val">${cs.def}</span></div></div>
+          <div class="col"><div class="stat"><span class="lbl">🏆/☠️</span><span class="val">${S.wins}/${S.losses}</span></div></div>
+          <div class="col"><div class="stat"><span class="lbl">🏋️ Банда</span><span class="val">${S.band?(S.band.type==="heron"?"🦩 цапли":"🐸 братва")+" "+S.band.loyalty:"—"}</span></div></div>
+        </div>
+      </div>
+    </div>`;
+}
+
+function actionsBlock(){
+  return `<div class="panel">
+    <h2>Действия</h2>
+    <div class="grid3">
+      <div class="item"><div class="name">🍽 Покормить</div><div class="desc">+1 сыт, +15 настр.</div>
+        <div class="cd ${ready(S.cd.feed)?"ready":""}">КД: ${fmtCD(S.cd.feed)}</div>
+        <button class="btn" onclick="feed()" ${ready(S.cd.feed)?"":"disabled"}>Покормить</button></div>
+      <div class="item"><div class="name">🍰 Откормить (500 🐞)</div><div class="desc">+5 сыт</div>
+        <div class="cd ${ready(S.cd.force)?"ready":""}">КД: ${fmtCD(S.cd.force)}</div>
+        <button class="btn" onclick="force()" ${ready(S.cd.force)?"":"disabled"}>Откормить</button></div>
+      <div class="item"><div class="name">💊 Реанимировать</div><div class="desc">аптечка нужна</div>
+        <button class="btn" onclick="reanimate()">Лечить</button></div>
+      <div class="item"><div class="name">🍭 Леденец</div><div class="desc">+25 настроения</div>
+        <button class="btn" onclick="useLolipop()">Дать</button></div>
+      <div class="item"><div class="name">🔋 Капсула опыта</div><div class="desc">+35 сытости</div>
+        <button class="btn" onclick="useCapsule()">Использовать</button></div>
+      <div class="item"><div class="name">🐸 Рассылка</div><div class="desc">Взять жабу из чата</div>
+        <button class="btn alt" onclick="takeFrog()">Взять жабу (${S.inv.frogling||0}/10)</button></div>
+      <div class="item"><div class="name">📝 Имя</div><div class="desc">Первая смена бесплатно, затем 250 🐞</div>
+        <button class="btn alt" onclick="renameFrog()">Сменить</button></div>
+      <div class="item"><div class="name">💃 Туса</div><div class="desc">${S.band?"250":"150"} 🐞, +настроение</div>
+        <div class="cd ${ready(S.cd.party)?"ready":""}">КД: ${fmtCD(S.cd.party)}</div>
+        <button class="btn alt" onclick="party()" ${ready(S.cd.party)?"":"disabled"}>На тусу</button></div>
+      <div class="item"><div class="name">🥷 Ограбление</div><div class="desc">Мини-квест на 🐞</div>
+        <div class="cd ${ready(S.cd.robbery)?"ready":""}">КД: ${fmtCD(S.cd.robbery)}</div>
+        <button class="btn alt" onclick="robbery()" ${ready(S.cd.robbery)?"":"disabled"}>Начать</button></div>
+    </div>
+  </div>`;
+}
+
+function rpBlock(){
+  return `<div class="panel"><h2>🎭 РП-команды</h2>
+    <div class="row">
+      ${RP_VERBS.map(v=>`<button class="btn small alt" onclick="rp('${v[0]}')">${v[0]}</button>`).join("")}
+    </div>
+    <p class="help">Позже эти команды используются в чате с другими игроками; здесь — взаимодействие с собственной жабой.</p>
+  </div>`;
+}
+
+function classBlock(){
+  if(S.level<5) return `<div class="panel"><h2>🎓 Класс</h2><p class="help">Доступен с 5 уровня. Сейчас уровень ${S.level}.</p></div>`;
+  return `<div class="panel"><h2>🎓 Класс</h2>
+    <p>Текущий: <b>${CLASSES[S.cls].name}</b> ${S.clsLvl?("ур."+S.clsLvl):""}</p>
+    ${S.cls==="none"?`<div class="grid3">
+      ${Object.entries(CLASSES).filter(([k])=>k!=="none").map(([k,c])=>
+        `<div class="item"><div class="name">${c.name}</div><div class="desc">${c.desc}</div>
+          <button class="btn" onclick="pickClass('${k}')">Выбрать (1000 🐞)</button></div>`).join("")}
+    </div>`:`<div class="row">
+      <button class="btn" onclick="classUp()" ${S.clsLvl>=3?"disabled":""}>Прокачать (${S.clsLvl===1?7500:10000} 🐞)</button>
+      <button class="btn alt" onclick="changeClass(true)">Сменить со сбросом (5000 🐞)</button>
+      <button class="btn alt" onclick="changeClass(false)">Сменить без сброса (20000 🐞)</button>
+    </div>`}
+  </div>`;
+}
+
+function viewPet(){
+  return `<div class="head-grad">${petCardHtml()}</div>
+    ${actionsBlock()}
+    ${classBlock()}
+    ${rpBlock()}`;
+}
+
+function viewWork(){
+  const w = S.workActive;
+  let cur = "";
+  if(w){
+    cur = `<div class="panel"><h2>Текущая работа</h2>
+      <p>${w.kind==="basic"?"Базовая":"Карьерная"}: <b>${w.subkind}</b></p>
+      <div class="cd ${ready(w.doneAt)?"ready":""}">До завершения: ${fmtCD(w.doneAt)}</div>
+      <button class="btn" onclick="workFinish()" ${ready(w.doneAt)?"":"disabled"}>Завершить работу</button>
+    </div>`;
+  }
+  return `<div class="head-grad">${petCardHtml()}</div>
+    ${cur}
+    <div class="panel"><h2>🧑‍🍳 Работа (8ч цикл = ~8 мин)</h2>
+      <p class="help">КД: ${fmtCD(S.cd.work)}</p>
+      <div class="grid3">
+        <div class="item"><div class="name">🍽 Столовая</div><div class="desc">Безопасно, мелкие 🐞</div>
+          <button class="btn" onclick="workStart('canteen')" ${ready(S.cd.work)&&!S.workActive?"":"disabled"}>Отправить</button></div>
+        <div class="item"><div class="name">🃏 Крупье</div><div class="desc">Лучшая ставка по 🐞</div>
+          <button class="btn" onclick="workStart('croupier')" ${ready(S.cd.work)&&!S.workActive?"":"disabled"}>Отправить</button></div>
+        <div class="item"><div class="name">🥷 Грабитель</div><div class="desc">🐞, шанс банды цапель, риск</div>
+          <button class="btn" onclick="workStart('robber')" ${ready(S.cd.work)&&!S.workActive?"":"disabled"}>Отправить</button></div>
+      </div>
+    </div>
+    <div class="panel"><h2>🗺 Карта болота — карьерные работы</h2>
+      <p class="help">КД на поход: ${fmtCD(S.cd.walk)}</p>
+      <div class="grid3">
+        <div class="item"><div class="name">🍰 Кафетерий</div><div class="desc">+шанс доп. сытости</div>
+          <button class="btn alt" onclick="adventureStart('cafeteria')" ${ready(S.cd.walk)&&!S.workActive?"":"disabled"}>В поход</button></div>
+        <div class="item"><div class="name">🎰 Казино</div><div class="desc">+шанс доп. карт болота</div>
+          <button class="btn alt" onclick="adventureStart('casino')" ${ready(S.cd.walk)&&!S.workActive?"":"disabled"}>В поход</button></div>
+        <div class="item"><div class="name">🏦 Банк</div><div class="desc">+проч. снаряжению, шанс банды</div>
+          <button class="btn alt" onclick="adventureStart('bank')" ${ready(S.cd.walk)&&!S.workActive?"":"disabled"}>В поход</button></div>
+      </div>
+    </div>`;
+}
+
+function viewFight(){
+  let arenaBlock = `<div class="panel"><h2>⚔️ Арена (PvP vs NPC)</h2>
+    <p>Лига: <b>${ {wood:"🪵 Дерево",bronze:"🥉 Бронза",silver:"🥈 Серебро",gold:"🥇 Золото"}[S.arena.league] }</b>
+       · Побед/Пораж: <b>${S.arena.wins}/${S.arena.losses}</b>
+       · Бесплатных регистраций ещё: <b>${S.quickRegFreeLeft}</b></p>
+    <div class="row">
+      <button class="btn" onclick="arenaRegister()" ${S.arena.reg?"disabled":""}>${S.arena.reg?"Уже зарегистрирован":"Зарегистрироваться"}</button>
+      <button class="btn alt" onclick="arenaAttack()" ${S.arena.reg && !S.arena.atk?"":"disabled"}>Атаковать</button>
+    </div>
+    <p class="help">Регистрация — каждый "час" (60 игровых минут). Стоимость: 100 🐞 (первые 10 — бесплатно).</p>
+  </div>`;
+
+  let duelBlock = `<div class="panel"><h2>🥊 Дуэль (vs случайный соперник)</h2>
+    <div class="cd ${ready(S.cd.duel)?"ready":""}">КД: ${fmtCD(S.cd.duel)}</div>
+    <button class="btn" onclick="duel()" ${ready(S.cd.duel)?"":"disabled"}>Вызвать</button>
+  </div>`;
+
+  let dungBlock = `<div class="panel"><h2>👹 Подземелья</h2>
+    <div class="cd ${ready(S.cd.dungeon)?"ready":""}">КД: ${fmtCD(S.cd.dungeon)}</div>
+    <div class="grid3">
+      ${DUNGEONS.map(d=>`<div class="item"><div class="name">${d.name}</div>
+        <div class="desc">Босс: ${d.boss} (HP ${d.bossHp}, атк ${d.bossAtk}, защ ${d.bossDef})</div>
+        <div class="desc">Цена: ${d.cost} 🐞</div>
+        <button class="btn" onclick="dungeonStart('${d.id}')" ${ready(S.cd.dungeon)&&S.bugs>=d.cost?"":"disabled"}>Войти</button>
+      </div>`).join("")}
+    </div>
+  </div>`;
+
+  let topB = getTopBoard();
+  let topBlock = `<div class="panel"><h2>🏅 Топ-10 (сезон арены)</h2>
+    <table class="table"><thead><tr><th>#</th><th>Имя</th><th>Ур.</th><th>Побед</th></tr></thead><tbody>
+      ${topB.map((t,i)=>`<tr><td>${i+1}</td><td>${t.name}</td><td>${t.level}</td><td>${t.wins}</td></tr>`).join("")}
+    </tbody></table></div>`;
+
+  return `<div class="head-grad">${petCardHtml()}</div>${arenaBlock}${duelBlock}${dungBlock}${topBlock}`;
+}
+
+function viewClan(){
+  if(!S.clan){
+    return `<div class="panel"><h2>🛡 Клан</h2>
+      <p>Клана нет. Создай за 1500 🐞 — получишь 4 NPC-соклановцев.</p>
+      <button class="btn" onclick="clanCreate()">Создать клан</button>
+    </div>`;
+  }
+  const c = S.clan;
+  return `<div class="panel"><h2>🛡 Клан «${c.name}»</h2>
+    <div class="stat"><span class="lbl">Уровень</span><span class="val">${c.lvl}</span></div>${bar(c.exp,100*c.lvl)}
+    <div class="stat"><span class="lbl">Очки</span><span class="val">${c.points}</span></div>
+    <div class="stat"><span class="lbl">Атак / Побед</span><span class="val">${c.attacks}/${c.wins}</span></div>
+    <h3>Состав (5/5)</h3>
+    <table class="table">
+      <tr><td>⭐ ${S.name} (ты)</td><td>ур. ${S.level}</td></tr>
+      ${c.members.map(m=>`<tr><td>${m.name}</td><td>ур. ${m.level}</td></tr>`).join("")}
+    </table>
+    <h3>Действия</h3>
+    <div class="row">
+      <button class="btn" onclick="clanWar()">Клановая война (карта + бой)</button>
+      <button class="btn alt" onclick="clanMapWalk()">Отправиться за картой</button>
+    </div>
+    <p class="help">Карты: 🗺 ${S.inv.map||0} · 🌌 ${S.inv.mapPrem||0}. КД карты: ${fmtCD(S.cd.mapCard)}</p>
+  </div>`;
+}
+
+function viewFamily(){
+  let mr = `<div class="panel"><h2>💍 Брак</h2>`;
+  if(!S.spouse){
+    mr += `<p>Сейчас не в браке. Брак стоит 500 🐞.</p>
+      <button class="btn" onclick="marryNPC()">Заключить брак (NPC)</button>`;
+  } else {
+    mr += `<p>Партнёр: <b>${S.spouse.name}</b>. В браке ${gameMinutes()-S.spouse.since} минут (нужно 11 для жабёнка).</p>
+      <div class="row">
+        <button class="btn" onclick="brakReward()">🎁 Брак-вознаграждение</button>
+        <button class="btn alt" onclick="checkFaith()">🔎 Проверка верности</button>
+        <button class="btn bad" onclick="divorce()">💔 Развод (500 🐞)</button>
+      </div>`;
+  }
+  mr += `</div>`;
+
+  let cd = `<div class="panel"><h2>👶 Жабёнок</h2>`;
+  if(!S.child){
+    cd += `<p>Жабёнка нет.</p>
+      <button class="btn" onclick="adoptChild()" ${S.spouse?"":"disabled"}>Взять жабёнка (брак 11+ мин.)</button>`;
+  } else {
+    const c = S.child;
+    cd += `<div class="stat"><span class="lbl">${c.name}</span><span class="val">ур. ${c.level}</span></div>
+      <div class="stat"><span class="lbl">🍰 Сытость</span><span class="val">${c.fill}/${c.fillMax}</span></div>${bar(c.fill,c.fillMax)}
+      <div class="row" style="margin-top:8px">
+        <button class="btn" onclick="feedChild()">Покормить (75 🐞)</button>
+        <button class="btn alt" onclick="kindergarten()" ${c.kg?"disabled":""}>${c.kg?"В саду":"В детсад"}</button>
+        <button class="btn alt" onclick="pickupChild()" ${c.kg?"":"disabled"}>Забрать</button>
+        <button class="btn warn" onclick="childBrawl()">🥊 На махач</button>
+      </div>
+      ${c.kg?`<p class="help">Готов через ${fmtCD(c.kg.done)}.</p>`:""}
+      <p class="help">Махач КД: ${fmtCD(c.brawlReadyAt)}</p>`;
+  }
+  cd += `</div>`;
+
+  return `<div class="head-grad">${petCardHtml()}</div>${mr}${cd}`;
+}
+
+function viewGames(){
+  return `<div class="panel"><h2>🎰 Рулетка</h2>
+    <p>Цвета: красный/чёрный (×1.5), зелёный (редко, ×14).</p>
+    <div class="row">
+      <input class="mini-input" id="rouAmt" type="number" value="50">
+      <button class="btn" onclick="roulette(document.getElementById('rouAmt').value,'red')">Красный</button>
+      <button class="btn alt" onclick="roulette(document.getElementById('rouAmt').value,'black')">Чёрный</button>
+      <button class="btn warn" onclick="roulette(document.getElementById('rouAmt').value,'green')">Зелёный</button>
+    </div>
+  </div>
+  <div class="panel"><h2>✊ Камень-ножницы-бумага</h2>
+    <p>Победа: ×1.9 ставки.</p>
+    <div class="row">
+      <input class="mini-input" id="kspAmt" type="number" value="50">
+      <button class="btn" onclick="ksp(document.getElementById('kspAmt').value)">КМН</button>
+    </div>
+  </div>
+  <div class="panel"><h2>🏁 Гонка</h2>
+    <p>Шанс ~34% (с пивасом ~54%). Победа: ×3.4 ставки.</p>
+    <div class="row">
+      <input class="mini-input" id="raceAmt" type="number" value="50">
+      <button class="btn" onclick="race(document.getElementById('raceAmt').value)">Старт</button>
+    </div>
+  </div>
+  <div class="panel"><h2>🎫 Жаба дня</h2>
+    <p class="cd ${ready(S.cd.dailyJaba)?"ready":""}">КД: ${fmtCD(S.cd.dailyJaba)}</p>
+    <button class="btn" onclick="dailyJaba()" ${ready(S.cd.dailyJaba)?"":"disabled"}>Получить</button>
+  </div>`;
+}
+
+function dailyJaba(){
+  if(!ready(S.cd.dailyJaba)) return toast("Через "+fmtCD(S.cd.dailyJaba));
+  S.cd.dailyJaba = setCD(4);
+  S.bugs += 150;
+  log("🎫 Жаба дня: +150 🐞");
+  save(); render();
+}
+
+function viewGear(){
+  const slots = ["helmet","chest","boots","melee","ranged","amulet"];
+  let equipped = `<div class="panel"><h2>🛡 Снаряжение</h2>`;
+  slots.forEach(slot=>{
+    const e = S.equip[slot];
+    const meta = e ? GEAR_CRAFTS.find(g=>g.id===e.craftId) : null;
+    equipped += `<div class="equip-slot"><div class="nm">${GEAR_TYPES[slot]?.emoji||"📿"} <b>${GEAR_TYPES[slot]?.ru||"Кулон"}</b> — ${meta?meta.name:"<span style='color:var(--muted)'>пусто</span>"}</div>
+      <div class="dur">${meta?("прочн. "+e.durability+"/"+meta.dur):""}
+        ${meta?`<button class="btn small alt" onclick="repair('${slot}')">Починить</button>`:""}
+        ${meta&&S.gems>0?`<button class="btn small" onclick="applyMod('${slot}','dmg')">+мод 👊</button><button class="btn small alt" onclick="applyMod('${slot}','armor')">+мод 🛡</button>`:""}
+      </div></div>`;
+  });
+  equipped += `</div>`;
+
+  let crafts = `<div class="panel"><h2>🔨 Крафт</h2><div class="grid3">`;
+  GEAR_CRAFTS.forEach(c=>{
+    const can = (S.bugs>=(c.cost.bugs||0)) &&
+      (!c.cost.herb||S.inv.herb>=c.cost.herb) &&
+      (!c.cost.lily||S.inv.lily>=c.cost.lily) &&
+      (!c.cost.beak||S.inv.beak>=c.cost.beak) &&
+      (!c.cost.gear||S.inv.gear>=c.cost.gear);
+    crafts += `<div class="item">
+      <div class="name">${c.emoji} ${c.name}</div>
+      <div class="desc">${GEAR_TYPES[c.slot]?.ru||c.slot} · +${c.bonus} · проч. ${c.dur}
+        ${c.tier==="event"?" · <span class='pill warn'>ивент</span>":""}
+      </div>
+      <div class="desc">Цена: ${Object.entries(c.cost).map(([k,v])=>v+" "+(k==="bugs"?"🐞":k==="herb"?"🌿":k==="lily"?"🥬":k==="beak"?"🦴":"⚙")).join(", ")}</div>
+      <button class="btn" onclick="craft('${c.id}')" ${can?"":"disabled"}>Скрафтить</button>
+    </div>`;
+  });
+  crafts += `</div></div>`;
+
+  let amuletPanel = `<div class="panel"><h2>📿 Кулоны</h2><div class="grid3">`;
+  AMULETS.forEach(a=>{
+    const can = S.bugs>=(a.cost.bugs||0) && (!a.cost.gear||S.inv.gear>=a.cost.gear) && (!a.cost.beak||S.inv.beak>=a.cost.beak);
+    amuletPanel += `<div class="item">
+      <div class="name">${a.name}</div>
+      <div class="desc">Банда +${(a.bandDmgBonus*100).toFixed(0)}% урон, +${a.bandMaxBonus} макс верности, ${a.days} дней</div>
+      <div class="desc">Цена: ${Object.entries(a.cost).map(([k,v])=>v+" "+(k==="bugs"?"🐞":k==="gear"?"⚙":"🦴")).join(", ")}</div>
+      <button class="btn" onclick="craftAmulet('${a.id}')" ${can?"":"disabled"}>Скрафтить</button>
+    </div>`;
+  });
+  amuletPanel += `</div></div>`;
+
+  return `<div class="head-grad">${petCardHtml()}</div>${equipped}${crafts}${amuletPanel}`;
+}
+
+function craftAmulet(id){
+  const a = AMULETS.find(x=>x.id===id);
+  if(!a) return;
+  for(const k in a.cost){
+    if((k==="bugs"?S.bugs:(S.inv[k]||0))<a.cost[k]) return toast("Не хватает "+k);
+  }
+  for(const k in a.cost){
+    if(k==="bugs") S.bugs-=a.cost[k]; else S.inv[k]-=a.cost[k];
+  }
+  applyAmulet(id);
+  save(); render();
+}
+
+function viewInv(){
+  const INV_LABELS = {
+    medkit:"💊 Аптечки", candy:"🍬 Конфетки", lolipop:"🍭 Леденцы",
+    expcap:"🔋 Капсулы опыта", snack:"🍰 Сытность",
+    herb:"🌿 Водоросли", lily:"🥬 Кувшинки", beak:"🦴 Кусочки клюва цапли",
+    gear:"⚙ Оружейные кусочки", tape:"🧿 Изолента",
+    map:"🗺 Карты болота", mapPrem:"🌌 Несгораемые карты",
+    beer:"🍺 Пивас", dragonfly:"🦟 Стрекозюля удачи",
+    frogling:"🐸 Жабульки (в банду)", snow:"❄️ Снежинки",
+    jewelbug:"🪲 Драгоценный жучок",
+  };
+  let inv = `<div class="panel"><h2>🎒 Инвентарь</h2><div class="grid3">`;
+  for(const k in INV_LABELS){
+    inv += `<div class="item"><div class="name">${INV_LABELS[k]}</div><div class="desc">x ${S.inv[k]||0}</div></div>`;
+  }
+  inv += `</div></div>`;
+  inv += `<div class="panel"><h2>💠 Жабогемы: ${S.gems}/50</h2>
+    <p class="help">Падают за клановый сезон и из золотых дейликов. Тратятся на модификаторы брони.</p>
+  </div>`;
+  return `<div class="head-grad">${petCardHtml()}</div>${inv}`;
+}
+
+function viewShop(){
+  return `<div class="head-grad">${petCardHtml()}</div>
+  <div class="panel"><h2>💸 Донат-баланс</h2>
+    <p>Текущий баланс: <b>${S.rub}₽</b></p>
+    <div class="row">
+      <button class="btn" onclick="donate(100)">+100₽ (тест)</button>
+      <button class="btn alt" onclick="donate(500)">+500₽ (тест)</button>
+      <button class="btn alt" onclick="donate(1000)">+1000₽ (тест)</button>
+    </div>
+    <p class="help">В оригинале — оплата через Telegram Stars/банка. Здесь — бесплатно для теста.</p>
+  </div>
+  <div class="panel"><h2>👑 Prime (89₽)</h2>
+    <p class="help">Кормёжка чаще, бесплатные смены имени, своя фотка и т.п.</p>
+    <button class="btn" onclick="buyPrime()" ${S.history.prime?"disabled":""}>${S.history.prime?"Куплено":"Купить Prime"}</button>
+  </div>
+  <div class="panel"><h2>📦 Сундуки</h2><div class="grid3">
+    ${Object.entries(CHEST_TYPES).map(([k,c])=>`<div class="item"><div class="name">${c.label}</div><div class="desc">${c.rub}₽</div>
+      <button class="btn" onclick="buyChest('${k}')">Купить</button></div>`).join("")}
+  </div></div>
+  <div class="panel"><h2>🛒 Магазин букашек</h2><div class="grid3">
+    <div class="item"><div class="name">💊 Аптечка (300)</div><button class="btn" onclick="buyPrem('medkit')">Купить</button></div>
+    <div class="item"><div class="name">🍭 Леденец (300)</div><button class="btn" onclick="buyPrem('lolipop')">Купить</button></div>
+    <div class="item"><div class="name">🍺 Пивас (750) — навсегда</div>
+      <button class="btn" onclick="buyPrem('beer')" ${S.inv.beer?"disabled":""}>${S.inv.beer?"Куплено":"Купить"}</button></div>
+    <div class="item"><div class="name">🦟 Стрекозюля (2000) — +10% 🐞 навсегда</div>
+      <button class="btn" onclick="buyPrem('dragonfly')" ${S.inv.dragonfly?"disabled":""}>${S.inv.dragonfly?"Куплено":"Купить"}</button></div>
+    <div class="item"><div class="name">🌌 Карта (20₽)</div>
+      <button class="btn" onclick="buyPrem('map')">Купить</button></div>
+  </div></div>
+  <div class="panel"><h2>💱 Конвертация рублей в букашки (35 🐞/₽)</h2>
+    <div class="row">
+      <input class="mini-input" id="rubAmt" type="number" value="50">
+      <button class="btn" onclick="rubToBugs(document.getElementById('rubAmt').value)">Конвертировать</button>
+    </div>
+  </div>
+  <div class="panel"><h2>🔁 Конвертер ресурсов</h2>
+    <p class="help">10 водорослей → 1 кувшинка · 10 кувшинок → 1 кусочек цапли.</p>
+    <div class="row">
+      <button class="btn alt" onclick="convert('herb','lily',10,1)">10 🌿 → 1 🥬</button>
+      <button class="btn alt" onclick="convert('lily','beak',10,1)">10 🥬 → 1 🦴</button>
+    </div>
+  </div>
+  <div class="panel"><h2>💀 Воскрешение жабы (100₽)</h2>
+    <button class="btn warn" onclick="resurrect()">Воскресить</button>
+  </div>`;
+}
+
+function convert(from,to,a,b){
+  if((S.inv[from]||0)<a) return toast("Не хватает "+from);
+  S.inv[from]-=a;
+  S.inv[to]=(S.inv[to]||0)+b;
+  log("🔁 "+a+" "+from+" → "+b+" "+to);
+  save(); render();
+}
+
+function viewDaily(){
+  let block = `<div class="panel"><h2>📋 Дейлики · Статус: <span class="pill ${S.daily.status==="gold"?"gold":S.daily.status==="silver"?"":S.daily.status==="bronze"?"":"good"}">${ {green:"💚 Зелёный",bronze:"🧡 Бронзовый",silver:"🤍 Серебряный",gold:"💛 Золотой"}[S.daily.status] }</span> · Серия: ${S.daily.streak}</h2>
+    <div class="grid2">`;
+  for(const d of DAILIES){
+    const v = S.daily.log[d.type]||0;
+    const done = v>=d.need;
+    const claimed = !!S.daily.claimed[d.id];
+    block += `<div class="item"><div class="name">${d.txt}</div>
+      <div class="desc">${v}/${d.need}${done?" ✅":""}${claimed?" · забрано":""}</div>
+      <div class="desc">Награда: ${Object.entries(d.reward).map(([k,v])=>v+" "+(k==="bugs"?"🐞":k==="gems"?"💠":k)).join(", ")}</div>
+      <button class="btn" onclick="claimDaily('${d.id}')" ${done&&!claimed?"":"disabled"}>${claimed?"Забрано":"Получить"}</button>
+    </div>`;
+  }
+  block += `</div></div>`;
+
+  let ach = `<div class="panel"><h2>🏅 Ачивки</h2><div class="ach-grid">`;
+  for(const a of ACH_DEFS){
+    const t = S.achievements[a.id]||0;
+    const cls = t===3?"g":t===2?"s":t===1?"b":"";
+    ach += `<div class="ach ${cls}">
+      <div class="n">${a.name}</div>
+      <div style="color:var(--muted)">Бронза ${a.tiers[0]} · Серебро ${a.tiers[1]} · Золото ${a.tiers[2]}</div>
+      <div>Текущий: <b>${["—","🥉 бронза","🥈 серебро","🥇 золото"][t]}</b></div>
+    </div>`;
+  }
+  ach += `</div></div>`;
+  return `${block}${ach}`;
+}
+
+function viewChat(){
+  return `<div class="panel"><h2>💬 Чат-лог (имитация ленты бота)</h2>
+    <div class="log">${S.log.map(l=>`<div class="l">${l}</div>`).join("")||"<i>Пусто</i>"}</div>
+  </div>`;
+}
+
+function viewSets(){
+  return `<div class="panel"><h2>⚙ Настройки</h2>
+    <div class="row" style="gap:14px;flex-direction:column">
+      <label><input type="checkbox" ${S.settings.fastBattle?"checked":""} onclick="S.settings.fastBattle=this.checked;save()"> Быстрые сражения</label>
+      <label><input type="checkbox" ${S.settings.deleteOld?"checked":""} onclick="S.settings.deleteOld=this.checked;save()"> Удалять старые сообщения чата</label>
+    </div>
+    <h3>Фото жабы</h3>
+    <div class="row">
+      ${["🐸","🐊","🦎","🐢","🦗","🪲","🐍"].map(e=>`<button class="btn small alt" onclick="S.photo='${e}';save();render()">${e}</button>`).join("")}
+    </div>
+    <h3>Сохранение</h3>
+    <div class="row">
+      <button class="btn alt" onclick="exportSave()">Экспорт</button>
+      <button class="btn alt" onclick="importSave()">Импорт</button>
+      <button class="btn bad" onclick="reset()">Сбросить игру</button>
+    </div>
+    <p class="help">Игра сохраняется в localStorage автоматически. Это локальная аналогия Жабабота — без сети, всё в одном файле. Все таймеры сжаты: «час» бота = ~1 игровая минута = 1 реальная секунда × 60.</p>
+  </div>`;
+}
+function exportSave(){
+  navigator.clipboard?.writeText(JSON.stringify(S));
+  toast("Сохранение скопировано в буфер.");
+}
+function importSave(){
+  const t = prompt("Вставь JSON сохранения:");
+  if(!t) return;
+  try{ const s = JSON.parse(t); localStorage.setItem(SAVE_KEY,JSON.stringify(s)); location.reload(); }catch(e){ toast("Битый JSON"); }
+}
+
+function render(){
+  renderTabs();
+  renderHud();
+  const v = document.getElementById("view");
+  let html="";
+  switch(currentTab){
+    case "pet": html=viewPet(); break;
+    case "work": html=viewWork(); break;
+    case "fight": html=viewFight(); break;
+    case "clan": html=viewClan(); break;
+    case "family": html=viewFamily(); break;
+    case "games": html=viewGames(); break;
+    case "gear": html=viewGear(); break;
+    case "inv": html=viewInv(); break;
+    case "shop": html=viewShop(); break;
+    case "daily": html=viewDaily(); break;
+    case "chat": html=viewChat(); break;
+    case "sets": html=viewSets(); break;
+  }
+  v.innerHTML = html;
+}
+
+/* ===================== ИНИЦИАЛИЗАЦИЯ ===================== */
+
+function init(){
+  S = load() || defaultState();
+  if(!S.startedAt) S.startedAt = now();
+  if(!S.daily) S.daily={date:0,log:{},claimed:{},streak:0,status:"green"};
+  if(!S.history) S.history={};
+  if(!S.inv) S.inv={};
+  if(!S.equip) S.equip={};
+  if(!S.mods) S.mods={};
+  if(!S.settings) S.settings={};
+  if(typeof S.quickRegFreeLeft!=="number") S.quickRegFreeLeft=10;
+  // экспонируем для onclick
+  window.feed=feed; window.force=force; window.reanimate=reanimate;
+  window.useLolipop=useLolipop; window.useCapsule=useCapsule;
+  window.renameFrog=renameFrog; window.workStart=workStart;
+  window.workFinish=workFinish; window.adventureStart=adventureStart;
+  window.arenaRegister=arenaRegister; window.arenaAttack=arenaAttack;
+  window.dungeonStart=dungeonStart; window.clanCreate=clanCreate;
+  window.clanWar=clanWar; window.clanMapWalk=clanMapWalk;
+  window.marryNPC=marryNPC; window.divorce=divorce;
+  window.brakReward=brakReward; window.checkFaith=checkFaith;
+  window.adoptChild=adoptChild; window.feedChild=feedChild;
+  window.kindergarten=kindergarten; window.pickupChild=pickupChild;
+  window.childBrawl=childBrawl;
+  window.roulette=roulette; window.ksp=ksp; window.race=race;
+  window.party=party; window.robbery=robbery; window.duel=duel;
+  window.craft=craft; window.repair=repair; window.applyMod=applyMod;
+  window.buyChest=buyChest; window.buyPrem=buyPrem; window.donate=donate;
+  window.rubToBugs=rubToBugs; window.buyPrime=buyPrime; window.resurrect=resurrect;
+  window.pickClass=pickClass; window.classUp=classUp; window.changeClass=changeClass;
+  window.rp=rp; window.takeFrog=takeFrog; window.feedBand=feedBand;
+  window.dailyJaba=dailyJaba; window.craftAmulet=craftAmulet;
+  window.convert=convert; window.closeModal=closeModal;
+  window.exportSave=exportSave; window.importSave=importSave;
+  window.reset=reset; window.claimDaily=claimDaily;
+  window.S=S;
+  render();
+  setInterval(()=>{ tick(); if(document.getElementById("view").innerHTML) renderHud(); }, TICK_MS);
+  setInterval(()=>{ render(); }, 5000);
+  log("🐸 Игра запущена. Добро пожаловать в HTML-болото!");
+}
+init();
+</script>
+</body>
+</html>
